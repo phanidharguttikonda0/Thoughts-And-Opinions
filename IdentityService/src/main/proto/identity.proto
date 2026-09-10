@@ -1,0 +1,81 @@
+syntax = "proto3";
+package identity;
+import "google/protobuf/empty.proto";
+import "google/protobuf/timestamp.proto";
+
+service IdentityGatewayService {
+  rpc SignUp (SignUpRequest) returns (AuthResponse);          // POST /auth/signup
+  rpc Login (LoginRequest) returns (AuthResponse);            // POST /auth/login
+  rpc UpdateProfile (UpdateProfileRequest) returns (google.protobuf.Empty);   // PATCH /profile
+  rpc FollowUser (FollowRequest) returns (google.protobuf.Empty);             // POST /users/{id}/follow
+  rpc UnfollowUser (FollowRequest) returns (google.protobuf.Empty);           // DELETE /users/{id}/follow
+  rpc GetUserProfile (GetUserRequest) returns (ProfileData);  // GET /users/{username}
+  rpc SearchUsers (SearchRequest) returns (SearchResponse);   // GET /search/users?q=
+}
+
+message SignUpRequest {
+  string email = 1;
+  string username = 2;
+  string password = 3;
+  string name = 4;
+}
+
+message LoginRequest {
+  string username = 1;
+  string password = 2;
+}
+
+message AuthResponse {
+  string user_id = 1;
+  string jwt_token = 2;
+}
+
+// ==========================================
+// Profile & User Models
+// ==========================================
+
+message ProfileData {
+  string user_id = 1;
+  string username = 2;
+  string name = 3;
+  string bio = 4;
+  string profile_pic = 5;
+  int32 followers_count = 6;
+  int32 following_count = 7;
+  google.protobuf.Timestamp joined_at = 8;
+}
+
+message UpdateProfileRequest {
+  // Using 'optional' is perfect for PATCH requests.
+  // It allows Java to differentiate between a null value (don't update)
+  // and an empty string (clear the field).
+  string user_id = 1;              // The ID of the user being updated
+  optional string name = 2;
+  optional string bio = 3;
+  optional string avatar_url = 4;
+  optional string username = 5;
+}
+
+message GetUserRequest {
+  string username = 1;
+}
+
+message FollowRequest {
+  string user_id = 1; // The user making the request (extracted from JWT by Gateway)
+  string target_user_id = 2; // The user they want to follow/unfollow
+}
+
+message SearchRequest {
+  string query = 1;       // we apply Like username% and return the top 5
+}
+
+message UserDetails {
+  string user_id = 1;
+  string username = 2 ;
+  string name = 3;
+  string profile_pic = 4;
+}
+
+message SearchResponse {
+  repeated UserDetails users = 1;  // 'repeated' acts as a List/Array in Java
+}
