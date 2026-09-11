@@ -16,6 +16,12 @@ public class GlobalGrpcExceptionHandler implements GrpcExceptionHandler {
                     ((UserExistsException) exception).getType() + " Already Exists"
             ).asException() ;
         }
+        if (exception instanceof  UserNotFoundException) {
+            return Status.NOT_FOUND.withDescription("user not found").asException();
+        }
+        if(exception instanceof InCorrectCredentials) {
+            return Status.PERMISSION_DENIED.withDescription("Invalid Credentials Passed").asException();
+        }
 
         if (exception instanceof org.springframework.dao.DataIntegrityViolationException) {
             // this exists , by database , if username and email are exists in database

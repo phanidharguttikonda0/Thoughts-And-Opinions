@@ -2,6 +2,16 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
 		 xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
 	<modelVersion>4.0.0</modelVersion>
+
+
+	<!--
+	 This Parent Spring boot starter is very important , where there is no need to specifying any
+	 version to spring boot dependencies , where based on the spring boot version, it will find
+	 the best suitable dependencies, like we have spring-boot-starter-actutator , spring-boot-starter-data-jpa
+	 , spring-boot-starter-Security etc. For all these packages based on the spring boot version we
+	 specified it will get's the best suitable version. and also configures default compiler settings
+	 (Java 21), encoding rules.
+	 -->
 	<parent>
 		<groupId>org.springframework.boot</groupId>
 		<artifactId>spring-boot-starter-parent</artifactId>
@@ -38,10 +48,26 @@
 		<minio.version>8.5.17</minio.version>
 	</properties>
 	<dependencies>
+		<!--
+		Actuator dependency provides us production ready health monitoring , application metrics,
+		checking end points whether server was running or not.
+		-->
 		<dependency>
 			<groupId>org.springframework.boot</groupId>
 			<artifactId>spring-boot-starter-actuator</artifactId>
 		</dependency>
+
+		<!--
+		 The Spring boot Starter Security gives some security tools like password hashing,
+		 cryptographic tools and many more
+
+		 When Come to data JPA , it gives us the ability to build database schemas in Java
+		 Classes via JPA rules and provides underlying hibernate orm.
+
+		 When Comes to Postgres SQL Driver, That helps to Communicate with the Postgres Database
+		 seamlessly , as postgres sql follows postgres protocol, so it helps in connecting with
+		 postgres database.
+		-->
 		<dependency>
 			<groupId>org.springframework.boot</groupId>
 			<artifactId>spring-boot-starter-data-jpa</artifactId>
@@ -56,6 +82,9 @@
 			<artifactId>postgresql</artifactId>
 			<scope>runtime</scope>
 		</dependency>
+		<!--
+			Lombok Autogenerates the Setters, getters and Constructors for a class.
+		-->
 		<dependency>
 			<groupId>org.projectlombok</groupId>
 			<artifactId>lombok</artifactId>
@@ -77,9 +106,10 @@
 			<scope>test</scope>
 		</dependency>
 
-		<!-- 1. Spring gRPC official starter.
-		     NOTE: groupId is org.springframework.grpc, NOT org.springframework.boot.
-		     "spring-boot-starter-grpc-server" does not exist on Maven Central. -->
+		<!-- The official modern Spring package used to host high-performance gRPC services.
+		It automatically manages your server setup on start and handles functional global
+		exception routing out of the box.
+		-->
 		<dependency>
 			<groupId>org.springframework.grpc</groupId>
 			<artifactId>spring-grpc-server-spring-boot-starter</artifactId>

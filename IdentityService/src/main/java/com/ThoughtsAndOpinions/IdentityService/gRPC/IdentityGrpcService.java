@@ -4,7 +4,7 @@ import com.ThoughtsAndOpinions.IdentityService.model.AuthenticationResponse;
 import com.ThoughtsAndOpinions.IdentityService.service.UserService;
 import com.google.protobuf.Empty;
 import identity.*;
-import identity.IdentityGatewayServiceGrpc; // your generated proto package
+import identity.IdentityGatewayServiceGrpc;
 import io.grpc.stub.StreamObserver;
 import org.springframework.grpc.server.service.GrpcService;
 
@@ -20,13 +20,10 @@ public class IdentityGrpcService extends IdentityGatewayServiceGrpc.IdentityGate
     @Override
     public void signUp(SignUpRequest request, StreamObserver<AuthResponse> responseObserver) {
 
-
-        // need to hash the Password over here.
-
         AuthenticationResponse response = service.createUser(request) ;
 
         AuthResponse resp = AuthResponse.newBuilder()
-                .setUserId(String.valueOf(response.id()))
+                .setUserId(response.id())
                 .setJwtToken(response.token())
                 .build() ;
 
@@ -37,7 +34,17 @@ public class IdentityGrpcService extends IdentityGatewayServiceGrpc.IdentityGate
 
     @Override
     public void login(LoginRequest request, StreamObserver<AuthResponse> responseObserver) {
-        super.login(request, responseObserver);
+
+        AuthenticationResponse response = service.authenticateUser(request.getUsername(), request.getPassword()) ;
+
+        AuthResponse resp = AuthResponse.newBuilder()
+                .setUserId(response.id()) // we need to make sure to change this to Long
+                .setJwtToken(response.token())
+                .build() ;
+
+        responseObserver.onNext(resp);
+        responseObserver.onCompleted();
+
     }
 
 

@@ -28,7 +28,7 @@ message LoginRequest {
 }
 
 message AuthResponse {
-  string user_id = 1;
+  int64 user_id = 1; // maps correctly with java long field and BIG INT Field in Database
   string jwt_token = 2;
 }
 
@@ -37,7 +37,7 @@ message AuthResponse {
 // ==========================================
 
 message ProfileData {
-  string user_id = 1;
+  int64 user_id = 1;
   string username = 2;
   string name = 3;
   string bio = 4;
@@ -51,7 +51,7 @@ message UpdateProfileRequest {
   // Using 'optional' is perfect for PATCH requests.
   // It allows Java to differentiate between a null value (don't update)
   // and an empty string (clear the field).
-  string user_id = 1;              // The ID of the user being updated
+  int64 user_id = 1;              // The ID of the user being updated
   optional string name = 2;
   optional string bio = 3;
   optional string avatar_url = 4;
@@ -63,8 +63,8 @@ message GetUserRequest {
 }
 
 message FollowRequest {
-  string user_id = 1; // The user making the request (extracted from JWT by Gateway)
-  string target_user_id = 2; // The user they want to follow/unfollow
+  int64 user_id = 1; // The user making the request (extracted from JWT by Gateway)
+  int64 target_user_id = 2; // The user they want to follow/unfollow
 }
 
 message SearchRequest {
@@ -72,7 +72,7 @@ message SearchRequest {
 }
 
 message UserDetails {
-  string user_id = 1;
+  int64 user_id = 1;
   string username = 2 ;
   string name = 3;
   string profile_pic = 4;

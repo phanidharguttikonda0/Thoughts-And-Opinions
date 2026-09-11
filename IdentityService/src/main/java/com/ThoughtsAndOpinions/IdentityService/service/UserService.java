@@ -1,8 +1,10 @@
 package com.ThoughtsAndOpinions.IdentityService.service;
 
 import com.ThoughtsAndOpinions.IdentityService.entity.UserEntity;
+import com.ThoughtsAndOpinions.IdentityService.exception.InCorrectCredentials;
 import com.ThoughtsAndOpinions.IdentityService.exception.UserExistsException;
 import com.ThoughtsAndOpinions.IdentityService.exception.UserExistsType;
+import com.ThoughtsAndOpinions.IdentityService.exception.UserNotFoundException;
 import com.ThoughtsAndOpinions.IdentityService.model.AuthenticationResponse;
 import com.ThoughtsAndOpinions.IdentityService.repository.UserRepository;
 import com.ThoughtsAndOpinions.IdentityService.security.JwtService;
@@ -52,5 +54,22 @@ public class UserService {
 
         return new AuthenticationResponse(user.getId(), token) ;
 
+    }
+
+    public AuthenticationResponse authenticateUser(String username, String password) {
+        // let's hash the password
+        String hashedPassword = passwordEncoder.encode(password) ;
+
+        Optional<UserEntity> user = userRepo.findByUsername(username) ;
+
+        if(user.isEmpty()) {
+            throw new UserNotFoundException("username : "+username+" not found") ;
+        }else if (user.get().getPasswordHash() != hashedPassword) {
+            throw new InCorrectCredentials("Invalid Credentials Passed") ;
+        }
+
+        String token = jwt.genrateToken(username, user.get().getId()) ;
+
+        return new AuthenticationResponse(user.get().getId(), token) ;
     }
 }
