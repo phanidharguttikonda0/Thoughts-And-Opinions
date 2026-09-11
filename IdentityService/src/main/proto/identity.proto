@@ -3,21 +3,23 @@ package identity;
 import "google/protobuf/empty.proto";
 import "google/protobuf/timestamp.proto";
 
+option java_multiple_files = true;
+
+
 service IdentityGatewayService {
-  rpc SignUp (SignUpRequest) returns (AuthResponse);          // POST /auth/signup
-  rpc Login (LoginRequest) returns (AuthResponse);            // POST /auth/login
-  rpc UpdateProfile (UpdateProfileRequest) returns (google.protobuf.Empty);   // PATCH /profile
-  rpc FollowUser (FollowRequest) returns (google.protobuf.Empty);             // POST /users/{id}/follow
-  rpc UnfollowUser (FollowRequest) returns (google.protobuf.Empty);           // DELETE /users/{id}/follow
-  rpc GetUserProfile (GetUserRequest) returns (ProfileData);  // GET /users/{username}
-  rpc SearchUsers (SearchRequest) returns (SearchResponse);   // GET /search/users?q=
+  rpc signUp (SignUpRequest) returns (AuthResponse);          // POST /auth/signup
+  rpc login (LoginRequest) returns (AuthResponse);            // POST /auth/login
+  rpc updateProfile (UpdateProfileRequest) returns (google.protobuf.Empty);   // PATCH /profile
+  rpc followUser (FollowRequest) returns (google.protobuf.Empty);             // POST /users/{id}/follow
+  rpc unfollowUser (FollowRequest) returns (google.protobuf.Empty);           // DELETE /users/{id}/follow
+  rpc getUserProfile (GetUserRequest) returns (ProfileData);  // GET /users/{username}
+  rpc searchUsers (SearchRequest) returns (SearchResponse);   // GET /search/users?q=
 }
 
 message SignUpRequest {
   string email = 1;
   string username = 2;
   string password = 3;
-  string name = 4;
 }
 
 message LoginRequest {

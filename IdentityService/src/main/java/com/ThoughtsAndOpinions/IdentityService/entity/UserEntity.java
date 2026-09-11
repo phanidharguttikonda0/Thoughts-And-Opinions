@@ -49,6 +49,14 @@ public class UserEntity {
     @OneToMany(mappedBy = "following", cascade = CascadeType.ALL, orphanRemoval = true)
     private Set<FollowerEntity> followers = new HashSet<>();
 
+    public UserEntity() {}
+
+    public UserEntity(String username, String email, String passwordHash) {
+        this.username = username ;
+        this.email = email;
+        this.passwordHash = passwordHash ;
+    }
+
     // Helper methods to keep relationships in sync
     public void addFollowing(UserEntity userToFollow) {
         FollowerEntity followRelation = new FollowerEntity(this, userToFollow);
