@@ -1,11 +1,11 @@
 package com.ThoughtsAndOpinions.IdentityService.service;
 
+import com.ThoughtsAndOpinions.IdentityService.entity.FollowerEntity;
+import com.ThoughtsAndOpinions.IdentityService.entity.FollowerId;
 import com.ThoughtsAndOpinions.IdentityService.entity.UserEntity;
-import com.ThoughtsAndOpinions.IdentityService.exception.InCorrectCredentials;
-import com.ThoughtsAndOpinions.IdentityService.exception.UserExistsException;
-import com.ThoughtsAndOpinions.IdentityService.exception.UserExistsType;
-import com.ThoughtsAndOpinions.IdentityService.exception.UserNotFoundException;
+import com.ThoughtsAndOpinions.IdentityService.exception.*;
 import com.ThoughtsAndOpinions.IdentityService.model.AuthenticationResponse;
+import com.ThoughtsAndOpinions.IdentityService.repository.FollowerRepository;
 import com.ThoughtsAndOpinions.IdentityService.repository.UserRepository;
 import com.ThoughtsAndOpinions.IdentityService.security.JwtService;
 import identity.SignUpRequest;
@@ -15,6 +15,7 @@ import org.springframework.stereotype.Service;
 
 import javax.swing.text.html.Option;
 import java.util.Optional;
+import java.util.Set;
 
 @Service
 public class UserService {
@@ -22,11 +23,13 @@ public class UserService {
     private final UserRepository userRepo;
     private final JwtService jwt ;
     private final PasswordEncoder passwordEncoder ;
+    private final FollowerRepository followerRepo ;
 
-    public UserService(UserRepository repo, JwtService jwt, PasswordEncoder passwordEncoder) {
+    public UserService(UserRepository repo, FollowerRepository followerRepo,JwtService jwt, PasswordEncoder passwordEncoder) {
         this.userRepo = repo ;
         this.jwt = jwt ;
         this.passwordEncoder = passwordEncoder ;
+        this.followerRepo = followerRepo ;
     }
 
     @Transactional
@@ -71,5 +74,58 @@ public class UserService {
         String token = jwt.genrateToken(username, user.get().getId()) ;
 
         return new AuthenticationResponse(user.get().getId(), token) ;
+    }
+
+    @Transactional
+    public void updateProfile(long user_id, Optional<String> username, Optional<String> name, Optional<String> bio, Optional<String> profilePicUrl) {
+
+        Optional<UserEntity> user = userRepo.findById(user_id) ;
+
+        if (user.isPresent()) {
+            username.ifPresent(u -> user.get().setUsername(u));
+
+            name.ifPresent(n -> user.get().setName(n));
+
+            bio.ifPresent(b -> user.get().setBio(b));
+
+            // profile picture will be uploaded by API gateway and passes the profile pic url
+            profilePicUrl.ifPresent(p -> user.get().setProfilePicUrl(p));
+        }else {
+            throw new UserNotFoundException("user_id : "+user_id +" not found") ;
+        }
+    }
+
+
+    @Transactional
+    public void followUser(long user_id, long following_id) {
+        Optional<UserEntity> user = userRepo.findById(user_id) ;
+
+        if(user.isPresent()) {
+            Optional<UserEntity> followingUser = userRepo.findById(following_id) ;
+            if (followingUser.isPresent()) {
+
+                Set<FollowerEntity> followings = user.get().getFollowing() ;
+
+                boolean alreadyExists = followings.stream().anyMatch(
+                        f -> f.getFollowing().getId() == following_id
+                ) ;
+
+                if (alreadyExists) {
+                    throw new AlreadyFollowingException("Already Following") ;
+                }else {
+                    Set<FollowerEntity> followers = followingUser.get().getFollowers() ;
+                    FollowerEntity followerEntity = new FollowerEntity(user.get(), followingUser.get()) ;
+                    followers.add(followerEntity);
+                    followings.add(followerEntity) ;
+
+                    followerRepo.save(followerEntity) ;
+                }
+
+            }else{
+                throw new UserNotFoundException("following_user_id "+following_id+" doesn't exists") ;
+            }
+        }else{
+            throw new UserNotFoundException("user_id : "+user_id +" not found") ;
+        }
     }
 }

@@ -2,9 +2,13 @@ package com.ThoughtsAndOpinions.IdentityService.entity;
 
 
 import jakarta.persistence.*;
+import lombok.Getter;
+import lombok.Setter;
 import org.hibernate.annotations.CreationTimestamp;
 import java.time.OffsetDateTime;
 
+@Getter
+@Setter
 @Entity
 @Table(name = "followers", schema = "identity_db")
 public class FollowerEntity {

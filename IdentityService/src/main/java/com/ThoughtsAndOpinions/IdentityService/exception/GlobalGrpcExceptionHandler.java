@@ -23,6 +23,10 @@ public class GlobalGrpcExceptionHandler implements GrpcExceptionHandler {
             return Status.PERMISSION_DENIED.withDescription("Invalid Credentials Passed").asException();
         }
 
+        if(exception instanceof AlreadyFollowingException) {
+            return Status.ALREADY_EXISTS.withDescription("Already Following").asException() ;
+        }
+
         if (exception instanceof org.springframework.dao.DataIntegrityViolationException) {
             // this exists , by database , if username and email are exists in database
             // because we are checking and then we are commiting , so in mean while if any

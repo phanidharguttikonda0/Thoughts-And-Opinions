@@ -12,4 +12,5 @@ public interface UserRepository extends JpaRepository<UserEntity, Long> {
 
     // Maps to your "LIKE username%" SearchRequest requirement
     List<UserEntity> findTop5ByUsernameStartingWithIgnoreCase(String prefix);
+
 }

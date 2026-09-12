@@ -8,6 +8,8 @@ import identity.IdentityGatewayServiceGrpc;
 import io.grpc.stub.StreamObserver;
 import org.springframework.grpc.server.service.GrpcService;
 
+import java.util.Optional;
+
 @GrpcService
 public class IdentityGrpcService extends IdentityGatewayServiceGrpc.IdentityGatewayServiceImplBase {
 
@@ -50,12 +52,33 @@ public class IdentityGrpcService extends IdentityGatewayServiceGrpc.IdentityGate
 
     @Override
     public void updateProfile(UpdateProfileRequest request, StreamObserver<Empty> responseObserver) {
+        /*
+        * As we specified optional in proto buffers, but it will send us an empty string instead
+        * of null value, so we need to check , using the has function.
+        * */
 
+        // Convert proto optional wrappers into standard Java Optionals
+        Optional<String> username = request.hasUsername() ? Optional.of(request.getUsername()) : Optional.empty();
+        Optional<String> name = request.hasName() ? Optional.of(request.getName()) : Optional.empty();
+        Optional<String> bio = request.hasBio() ? Optional.of(request.getBio()) : Optional.empty();
+
+        // Note: Map proto's 'avatar_url' to your service's 'profilePicUrl' parameter
+        Optional<String> profilePicUrl = request.hasAvatarUrl() ? Optional.of(request.getAvatarUrl()) : Optional.empty();
+
+
+        service.updateProfile(request.getUserId(), username, name, bio, profilePicUrl);
+
+        responseObserver.onNext(Empty.getDefaultInstance()); // means the update was successfull
+        responseObserver.onCompleted();
     }
 
     @Override
     public void followUser(FollowRequest request, StreamObserver<Empty> responseObserver) {
 
+        service.followUser(request.getUserId(), request.getTargetUserId());
+
+        responseObserver.onNext(Empty.getDefaultInstance());
+        responseObserver.onCompleted();
     }
 
 
