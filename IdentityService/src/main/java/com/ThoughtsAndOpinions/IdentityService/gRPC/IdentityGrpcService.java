@@ -84,7 +84,13 @@ public class IdentityGrpcService extends IdentityGatewayServiceGrpc.IdentityGate
 
 
     @Override
-    public void unfollowUser(FollowRequest request, StreamObserver<Empty> responseObserver) {}
+    public void unfollowUser(FollowRequest request, StreamObserver<Empty> responseObserver) {
+
+        service.unfollowUser(request.getUserId(), request.getTargetUserId());
+
+        responseObserver.onNext(Empty.getDefaultInstance());
+        responseObserver.onCompleted();
+    }
 
     @Override
     public void getUserProfile(GetUserRequest request, StreamObserver<ProfileData> responseObserver) {

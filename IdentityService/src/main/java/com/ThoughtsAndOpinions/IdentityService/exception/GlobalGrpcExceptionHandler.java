@@ -27,6 +27,10 @@ public class GlobalGrpcExceptionHandler implements GrpcExceptionHandler {
             return Status.ALREADY_EXISTS.withDescription("Already Following").asException() ;
         }
 
+        if(exception instanceof NotFollowingException) {
+            return Status.NOT_FOUND.withDescription("User was not following to unfollow").asException() ;
+        }
+
         if (exception instanceof org.springframework.dao.DataIntegrityViolationException) {
             // this exists , by database , if username and email are exists in database
             // because we are checking and then we are commiting , so in mean while if any

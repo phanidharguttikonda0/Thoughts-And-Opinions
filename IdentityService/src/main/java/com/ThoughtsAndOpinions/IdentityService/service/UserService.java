@@ -13,9 +13,9 @@ import jakarta.transaction.Transactional;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
-import javax.swing.text.html.Option;
 import java.util.Optional;
 import java.util.Set;
+import java.util.concurrent.atomic.AtomicReference;
 
 @Service
 public class UserService {
@@ -97,17 +97,17 @@ public class UserService {
 
 
     @Transactional
-    public void followUser(long user_id, long following_id) {
-        Optional<UserEntity> user = userRepo.findById(user_id) ;
+    public void followUser(long userId, long followingId) {
+        Optional<UserEntity> user = userRepo.findById(userId) ;
 
         if(user.isPresent()) {
-            Optional<UserEntity> followingUser = userRepo.findById(following_id) ;
+            Optional<UserEntity> followingUser = userRepo.findById(followingId) ;
             if (followingUser.isPresent()) {
 
                 Set<FollowerEntity> followings = user.get().getFollowing() ;
 
                 boolean alreadyExists = followings.stream().anyMatch(
-                        f -> f.getFollowing().getId() == following_id
+                        f -> f.getFollowing().getId() == followingId
                 ) ;
 
                 if (alreadyExists) {
@@ -122,10 +122,42 @@ public class UserService {
                 }
 
             }else{
-                throw new UserNotFoundException("following_user_id "+following_id+" doesn't exists") ;
+                throw new UserNotFoundException("following_user_id : "+followingId+" doesn't exists") ;
             }
         }else{
-            throw new UserNotFoundException("user_id : "+user_id +" not found") ;
+            throw new UserNotFoundException("user_id : "+userId +" not found") ;
+        }
+    }
+
+    public void unfollowUser(long userId, long unfollowId) {
+
+        Optional<UserEntity> user = userRepo.findById(userId) ;
+
+        if (user.isPresent()) {
+            Optional<UserEntity> unfollowUser = userRepo.findById(unfollowId) ;
+
+            if (unfollowUser.isPresent()) {
+
+                FollowerId followerId = new FollowerId(userId, unfollowId) ;
+
+                Set<FollowerEntity> followers = unfollowUser.get().getFollowers() ;
+                Set<FollowerEntity> following = user.get().getFollowing();
+
+                FollowerEntity followRelation = followers.stream().filter(
+                        f -> f.getFollower().getId() == userId
+                ).findFirst().orElseThrow(() -> new NotFollowingException("No Follow Entity in Database")) ;
+
+                followers.remove(followRelation) ;
+                following.remove(followRelation) ;
+
+                followerRepo.deleteById(followerId);
+
+            }else {
+                throw new UserNotFoundException("unfollowId : "+unfollowId+" doesn't exists") ;
+            }
+
+        }else{
+            throw new UserNotFoundException("user_id : "+userId +" not found") ;
         }
     }
 }

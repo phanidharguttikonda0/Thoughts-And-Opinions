@@ -13,4 +13,6 @@ public interface FollowerRepository extends JpaRepository<FollowerEntity, Follow
 
     // Count how many followers a user has
     int countByFollowingId(Long followingId);
+
+    void remove() ;
 }
