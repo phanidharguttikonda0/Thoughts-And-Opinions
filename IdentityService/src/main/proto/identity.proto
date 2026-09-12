@@ -16,6 +16,10 @@ service IdentityGatewayService {
   rpc searchUsers (SearchRequest) returns (SearchResponse);   // GET /search/users?q=
 }
 
+//* IMPORTANT NEXT STEP
+// need to implement get followersList , get followingList using cursor pagination
+// and need to mention those 2 functionalities in the .proto file
+
 message SignUpRequest {
   string email = 1;
   string username = 2;
@@ -59,7 +63,7 @@ message UpdateProfileRequest {
 }
 
 message GetUserRequest {
-  string username = 1;
+  int64 user_id = 1;
 }
 
 message FollowRequest {

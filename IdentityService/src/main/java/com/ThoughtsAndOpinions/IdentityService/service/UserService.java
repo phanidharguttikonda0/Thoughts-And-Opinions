@@ -5,14 +5,20 @@ import com.ThoughtsAndOpinions.IdentityService.entity.FollowerId;
 import com.ThoughtsAndOpinions.IdentityService.entity.UserEntity;
 import com.ThoughtsAndOpinions.IdentityService.exception.*;
 import com.ThoughtsAndOpinions.IdentityService.model.AuthenticationResponse;
+import com.ThoughtsAndOpinions.IdentityService.model.Profile;
+import com.ThoughtsAndOpinions.IdentityService.model.ProfileDetails;
 import com.ThoughtsAndOpinions.IdentityService.repository.FollowerRepository;
 import com.ThoughtsAndOpinions.IdentityService.repository.UserRepository;
 import com.ThoughtsAndOpinions.IdentityService.security.JwtService;
 import identity.SignUpRequest;
 import jakarta.transaction.Transactional;
+
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
+import org.springframework.data.domain.PageRequest;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 import java.util.concurrent.atomic.AtomicReference;
@@ -159,5 +165,33 @@ public class UserService {
         }else{
             throw new UserNotFoundException("user_id : "+userId +" not found") ;
         }
+    }
+
+
+    public Profile getUserProfile(long  userId) {
+
+        Optional<UserEntity> user = userRepo.findById(userId) ;
+
+        if (user.isEmpty()) {
+            throw new UserNotFoundException("userId : "+userId+" not found") ;
+        }
+
+        // we need to return these
+        return new Profile(userId, user.get().getUsername(),
+                user.get().getName(), user.get().getBio(), user.get().getProfilePicUrl(),
+                user.get().getFollowers().size(), user.get().getFollowing().size(), user.get().getCreatedAt()) ;
+
+
+    }
+
+    public ArrayList<ProfileDetails> getSearchedProfile(String prefix) {
+        // we need to get the  profiles of 5 users by applying LikeWise on database query
+
+        List<ProfileDetails> profileDetailsUsers = userRepo.findTop5UsersByUsernameStartingWith(
+                prefix, PageRequest.of(0,5)
+        ) ;
+
+
+        return (ArrayList<ProfileDetails>) profileDetailsUsers;
     }
 }

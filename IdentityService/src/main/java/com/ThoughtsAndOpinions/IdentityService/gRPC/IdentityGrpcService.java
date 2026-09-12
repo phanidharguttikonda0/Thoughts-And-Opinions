@@ -1,6 +1,6 @@
 package com.ThoughtsAndOpinions.IdentityService.gRPC;
 
-import com.ThoughtsAndOpinions.IdentityService.model.AuthenticationResponse;
+import com.ThoughtsAndOpinions.IdentityService.model.*;
 import com.ThoughtsAndOpinions.IdentityService.service.UserService;
 import com.google.protobuf.Empty;
 import identity.*;
@@ -8,6 +8,8 @@ import identity.IdentityGatewayServiceGrpc;
 import io.grpc.stub.StreamObserver;
 import org.springframework.grpc.server.service.GrpcService;
 
+
+import java.util.ArrayList;
 import java.util.Optional;
 
 @GrpcService
@@ -94,11 +96,54 @@ public class IdentityGrpcService extends IdentityGatewayServiceGrpc.IdentityGate
 
     @Override
     public void getUserProfile(GetUserRequest request, StreamObserver<ProfileData> responseObserver) {
-        super.getUserProfile(request, responseObserver);
+
+        Profile profile = service.getUserProfile(request.getUserId());
+
+        // Converted OffsetDateTime to com.google.protobuf.Timestamp, as proto buffers cannot understand
+        // standard java templates
+        java.time.Instant instant = profile.createdAt().toInstant();
+        com.google.protobuf.Timestamp joinedAtTimestamp = com.google.protobuf.Timestamp.newBuilder()
+                .setSeconds(instant.getEpochSecond())
+                .setNanos(instant.getNano())
+                .build();
+
+        ProfileData resp = ProfileData.newBuilder()
+                .setUserId(profile.userId())
+                .setBio(profile.bio())
+                .setName(profile.name())
+                .setUsername(profile.name())
+                .setFollowersCount(profile.followersCount())
+                .setFollowingCount(profile.followingCount())
+                .setProfilePic(profile.profilePicUrl())
+                .setJoinedAt(joinedAtTimestamp)
+                .build() ;
+
+        responseObserver.onNext(resp);
+        responseObserver.onCompleted();
+
     }
 
     @Override
     public void searchUsers(SearchRequest request, StreamObserver<SearchResponse> responseObserver) {
+           ArrayList<ProfileDetails> profileDetails =  service.getSearchedProfile(request.getQuery());
+
+        SearchResponse.Builder resp = SearchResponse.newBuilder() ;
+           for (ProfileDetails profile : profileDetails) {
+               resp.addUsers(UserDetails.newBuilder()
+                       .setUserId(profile.userId())
+                       .setName(profile.name())
+                       .setUsername(profile.username())
+                       .setProfilePic(profile.profilePicUrl())
+                       .build()) ;
+           }
+
+           SearchResponse response = resp.build() ;
+
+           responseObserver.onNext(response);
+           responseObserver.onCompleted();
 
     }
+
+    // need to implement get followersList , get followingList using cursor pagination
+    // and need to mention those 2 functionalities in the .proto file
 }
