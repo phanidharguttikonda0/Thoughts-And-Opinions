@@ -14,6 +14,19 @@ service IdentityGatewayService {
   rpc unfollowUser (FollowRequest) returns (google.protobuf.Empty);           // DELETE /users/{id}/follow
   rpc getUserProfile (GetUserRequest) returns (ProfileData);  // GET /users/{username}
   rpc searchUsers (SearchRequest) returns (SearchResponse);   // GET /search/users?q=
+  rpc getFollowersList (UsersListRequest) returns (UsersListResponse) ;
+  rpc getFollowingList (UsersListRequest) returns (UsersListResponse) ;
+}
+
+message UsersListRequest {
+  int64 user_id = 1;
+  int32 limit = 2; // by default limit will be 20, that we will set in API Gateway
+  optional string cursor = 3; // is the created_at timestamp
+}
+
+message UsersListResponse {
+  repeated UserDetails users = 1;
+  string next_cursor = 2 ;
 }
 
 //* IMPORTANT NEXT STEP

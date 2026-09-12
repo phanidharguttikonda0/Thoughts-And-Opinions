@@ -10,6 +10,7 @@ import com.ThoughtsAndOpinions.IdentityService.model.ProfileDetails;
 import com.ThoughtsAndOpinions.IdentityService.repository.FollowerRepository;
 import com.ThoughtsAndOpinions.IdentityService.repository.UserRepository;
 import com.ThoughtsAndOpinions.IdentityService.security.JwtService;
+import com.ThoughtsAndOpinions.IdentityService.utils.CursorUtils;
 import identity.SignUpRequest;
 import jakarta.transaction.Transactional;
 
@@ -17,6 +18,8 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import org.springframework.data.domain.PageRequest;
+
+import java.time.OffsetDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
@@ -194,4 +197,29 @@ public class UserService {
 
         return (ArrayList<ProfileDetails>) profileDetailsUsers;
     }
+
+    public ArrayList<ProfileDetails> getFollowersList(long user_id, int limit, String cursor) {
+
+        OffsetDateTime cursorTime = CursorUtils.decodeCursor(cursor) ;
+
+        ArrayList<ProfileDetails> profileDetails = (ArrayList<ProfileDetails>) userRepo.getFollowersList(
+                cursorTime, user_id, PageRequest.of(0, limit)
+        );
+
+        return profileDetails ;
+
+    }
+
+    public ArrayList<ProfileDetails> getFollowingList(long user_id, int limit, String cursor) {
+
+        OffsetDateTime cursorTime = CursorUtils.decodeCursor(cursor) ;
+
+        ArrayList<ProfileDetails> profileDetails = (ArrayList<ProfileDetails>) userRepo.getFollowingList(
+                cursorTime, user_id, PageRequest.of(0, limit)
+        );
+
+        return profileDetails ;
+
+    }
+
 }

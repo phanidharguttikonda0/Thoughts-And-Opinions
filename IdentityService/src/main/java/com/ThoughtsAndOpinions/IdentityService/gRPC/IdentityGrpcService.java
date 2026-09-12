@@ -2,6 +2,7 @@ package com.ThoughtsAndOpinions.IdentityService.gRPC;
 
 import com.ThoughtsAndOpinions.IdentityService.model.*;
 import com.ThoughtsAndOpinions.IdentityService.service.UserService;
+import com.ThoughtsAndOpinions.IdentityService.utils.CursorUtils;
 import com.google.protobuf.Empty;
 import identity.*;
 import identity.IdentityGatewayServiceGrpc;
@@ -9,6 +10,7 @@ import io.grpc.stub.StreamObserver;
 import org.springframework.grpc.server.service.GrpcService;
 
 
+import java.time.OffsetDateTime;
 import java.util.ArrayList;
 import java.util.Optional;
 
@@ -146,4 +148,59 @@ public class IdentityGrpcService extends IdentityGatewayServiceGrpc.IdentityGate
 
     // need to implement get followersList , get followingList using cursor pagination
     // and need to mention those 2 functionalities in the .proto file
+
+    @Override
+    public void getFollowersList(UsersListRequest request, StreamObserver<UsersListResponse> responseObserver) {
+
+        ArrayList<ProfileDetails> profileDetails = service.getFollowersList(request.getUserId(), request.getLimit(), request.getCursor()) ;
+
+        UsersListResponse.Builder resp = UsersListResponse.newBuilder() ;
+        int index = 0 ;
+        OffsetDateTime lastCursor = null ;
+        for (ProfileDetails profile : profileDetails) {
+            resp.addUsers(UserDetails.newBuilder()
+                    .setUserId(profile.userId())
+                    .setName(profile.name())
+                    .setUsername(profile.username())
+                    .setProfilePic(profile.profilePicUrl())
+                    .build()) ;
+            index += 1 ;
+            if (index == request.getLimit()) {
+                lastCursor = profile.createdAt() ;
+            }
+        }
+        resp.setNextCursor(CursorUtils.encodeCursor(lastCursor)) ;
+        UsersListResponse response = resp.build() ;
+
+
+        responseObserver.onNext(response);
+        responseObserver.onCompleted();
+    }
+
+    @Override
+    public void getFollowingList(UsersListRequest request, StreamObserver<UsersListResponse> responseObserver) {
+        ArrayList<ProfileDetails> profileDetails = service.getFollowingList(request.getUserId(), request.getLimit(), request.getCursor()) ;
+
+        UsersListResponse.Builder resp = UsersListResponse.newBuilder() ;
+        int index = 0 ;
+        OffsetDateTime lastCursor = null ;
+        for (ProfileDetails profile : profileDetails) {
+            resp.addUsers(UserDetails.newBuilder()
+                    .setUserId(profile.userId())
+                    .setName(profile.name())
+                    .setUsername(profile.username())
+                    .setProfilePic(profile.profilePicUrl())
+                    .build()) ;
+            index += 1 ;
+            if (index == request.getLimit()) {
+                lastCursor = profile.createdAt() ;
+            }
+        }
+        resp.setNextCursor(CursorUtils.encodeCursor(lastCursor)) ;
+        UsersListResponse response = resp.build() ;
+
+
+        responseObserver.onNext(response);
+        responseObserver.onCompleted();
+    }
 }
