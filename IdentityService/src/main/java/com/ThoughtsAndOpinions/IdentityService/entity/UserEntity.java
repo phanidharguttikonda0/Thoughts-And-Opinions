@@ -1,5 +1,6 @@
 package com.ThoughtsAndOpinions.IdentityService.entity;
 
+import com.ThoughtsAndOpinions.IdentityService.exception.NotFollowingException;
 import com.ThoughtsAndOpinions.IdentityService.utils.SnowflakeId;
 import jakarta.persistence.*;
 import lombok.Getter;
@@ -72,9 +73,16 @@ public class UserEntity {
     }
 
     public void removeFollowing(UserEntity userToUnfollow) {
-        FollowerEntity followRelation = new FollowerEntity(this, userToUnfollow);
-        this.following.remove(followRelation);
-        userToUnfollow.getFollowers().remove(followRelation);
+        FollowerEntity followRelation = this.following.stream()
+                .filter(f -> f.getFollowing().getId().equals(userToUnfollow.getId()))
+                .findFirst().orElse(null);
+                
+        if (followRelation != null) {
+            this.following.remove(followRelation);
+            userToUnfollow.getFollowers().remove(followRelation);
+        }else {
+            throw new NotFollowingException("No Follow relation Exists between Users to Unfollow") ;
+        }
     }
 
     // Getters and Setters omitted for brevity

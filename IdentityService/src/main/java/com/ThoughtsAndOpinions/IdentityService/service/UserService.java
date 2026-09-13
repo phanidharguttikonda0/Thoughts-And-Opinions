@@ -34,14 +34,13 @@ public class UserService {
     private final UserRepository userRepo;
     private final JwtService jwt ;
     private final PasswordEncoder passwordEncoder ;
-    private final FollowerRepository followerRepo ;
     private static final Logger log = LoggerFactory.getLogger(UserService.class);
 
-    public UserService(UserRepository repo, FollowerRepository followerRepo,JwtService jwt, PasswordEncoder passwordEncoder) {
+    public UserService(UserRepository repo, JwtService jwt, PasswordEncoder passwordEncoder) {
         this.userRepo = repo ;
         this.jwt = jwt ;
         this.passwordEncoder = passwordEncoder ;
-        this.followerRepo = followerRepo ;
+
     }
 
     @Transactional
@@ -118,7 +117,9 @@ public class UserService {
         Optional<UserEntity> user = userRepo.findById(userId) ;
 
         if(user.isPresent()) {
+            log.info("Got the User entity, who sent follow request");
             Optional<UserEntity> followingUser = userRepo.findById(followingId) ;
+            log.info("Got the following user entity");
             if (followingUser.isPresent()) {
 
                 Set<FollowerEntity> followings = user.get().getFollowing() ;
@@ -128,14 +129,17 @@ public class UserService {
                 ) ;
 
                 if (alreadyExists) {
+                    log.info("already following");
                     throw new AlreadyFollowingException("Already Following") ;
                 }else {
-                    Set<FollowerEntity> followers = followingUser.get().getFollowers() ;
-                    FollowerEntity followerEntity = new FollowerEntity(user.get(), followingUser.get()) ;
-                    followers.add(followerEntity);
-                    followings.add(followerEntity) ;
-
-                    followerRepo.save(followerEntity) ;
+                    log.info("Not following Already, So let's Create a Follow Relation");
+                    
+                    // The collections have cascade = CascadeType.ALL, so adding to them is enough.
+                    // We DO NOT call followerRepo.save() because JPA will try to merge the unmanaged
+                    // entity and cause a "detached entity passed to persist" error during flush.
+                    user.get().addFollowing(followingUser.get());
+                    
+                    log.info("Stored the Follow Relation Successfully");
                 }
 
             }else{
@@ -146,6 +150,7 @@ public class UserService {
         }
     }
 
+    @Transactional
     public void unfollowUser(long userId, long unfollowId) {
 
         Optional<UserEntity> user = userRepo.findById(userId) ;
@@ -154,20 +159,9 @@ public class UserService {
             Optional<UserEntity> unfollowUser = userRepo.findById(unfollowId) ;
 
             if (unfollowUser.isPresent()) {
+                log.info("Both users Present, let's remove from following");
 
-                FollowerId followerId = new FollowerId(userId, unfollowId) ;
-
-                Set<FollowerEntity> followers = unfollowUser.get().getFollowers() ;
-                Set<FollowerEntity> following = user.get().getFollowing();
-
-                FollowerEntity followRelation = followers.stream().filter(
-                        f -> f.getFollower().getId() == userId
-                ).findFirst().orElseThrow(() -> new NotFollowingException("No Follow Entity in Database")) ;
-
-                followers.remove(followRelation) ;
-                following.remove(followRelation) ;
-
-                followerRepo.deleteById(followerId);
+                user.get().removeFollowing(unfollowUser.get());
 
             }else {
                 throw new UserNotFoundException("unfollowId : "+unfollowId+" doesn't exists") ;
@@ -178,15 +172,17 @@ public class UserService {
         }
     }
 
-
+    @Transactional
     public Profile getUserProfile(long  userId) {
 
         Optional<UserEntity> user = userRepo.findById(userId) ;
 
         if (user.isEmpty()) {
+            log.info("user not found by id");
             throw new UserNotFoundException("userId : "+userId+" not found") ;
         }
 
+        log.info("we found the user");
         // we need to return these
         return new Profile(userId, user.get().getUsername(),
                 user.get().getName(), user.get().getBio(), user.get().getProfilePicUrl(),
@@ -195,6 +191,7 @@ public class UserService {
 
     }
 
+    @Transactional
     public ArrayList<ProfileDetails> getSearchedProfile(String prefix) {
         // we need to get the  profiles of 5 users by applying LikeWise on database query
 
@@ -206,9 +203,12 @@ public class UserService {
         return (ArrayList<ProfileDetails>) profileDetailsUsers;
     }
 
+    @Transactional
     public ArrayList<ProfileDetails> getFollowersList(long user_id, int limit, String cursor) {
-
-        OffsetDateTime cursorTime = CursorUtils.decodeCursor(cursor) ;
+        OffsetDateTime cursorTime = OffsetDateTime.MIN ;
+        if (cursor != null) {
+            cursorTime = CursorUtils.decodeCursor(cursor) ;
+        }
 
         ArrayList<ProfileDetails> profileDetails = (ArrayList<ProfileDetails>) userRepo.getFollowersList(
                 cursorTime, user_id, PageRequest.of(0, limit)
@@ -218,6 +218,7 @@ public class UserService {
 
     }
 
+    @Transactional
     public ArrayList<ProfileDetails> getFollowingList(long user_id, int limit, String cursor) {
 
         OffsetDateTime cursorTime = CursorUtils.decodeCursor(cursor) ;

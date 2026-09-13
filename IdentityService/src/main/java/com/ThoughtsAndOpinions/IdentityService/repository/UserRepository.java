@@ -21,7 +21,7 @@ public interface UserRepository extends JpaRepository<UserEntity, Long> {
 
     @Query("SELECT new com.ThoughtsAndOpinions.IdentityService.model.ProfileDetails(u.id, u.username, u.name, u.profilePicUrl, u.createdAt) " +
             "FROM UserEntity u " +
-            "WHERE u.username LIKE :usernamePrefix%")
+            "WHERE LOWER(u.username) LIKE LOWER(CONCAT(:usernamePrefix, '%'))")
     List<ProfileDetails> findTop5UsersByUsernameStartingWith(
             @Param("usernamePrefix") String usernamePrefix,
             PageRequest pageable
@@ -33,7 +33,7 @@ public interface UserRepository extends JpaRepository<UserEntity, Long> {
             "f.follower.id, f.follower.username, f.follower.name, f.follower.profilePicUrl, f.createdAt) " + // <-- Select f.createdAt
             "FROM FollowerEntity f " +
             "WHERE f.following.id = :userId " +
-            "AND f.createdAt <= :cursor " +
+            "AND f.createdAt < :cursor " +
             "ORDER BY f.createdAt DESC")
     List<ProfileDetails> getFollowersList(
             @Param("cursor") OffsetDateTime cursor,
@@ -45,7 +45,7 @@ public interface UserRepository extends JpaRepository<UserEntity, Long> {
             "f.following.id, f.following.username, f.following.name, f.following.profilePicUrl, f.createdAt) " + // <-- Select f.createdAt
             "FROM FollowerEntity f " +
             "WHERE f.follower.id = :userId " +
-            "AND f.createdAt <= :cursor " +
+            "AND f.createdAt < :cursor " +
             "ORDER BY f.createdAt DESC")
     List<ProfileDetails> getFollowingList(
             @Param("cursor") OffsetDateTime cursor,

@@ -8,6 +8,8 @@ import identity.*;
 import identity.IdentityGatewayServiceGrpc;
 import io.grpc.stub.StreamObserver;
 import jakarta.transaction.Transactional;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.grpc.server.service.GrpcService;
 
 
@@ -19,6 +21,7 @@ import java.util.Optional;
 public class IdentityGrpcService extends IdentityGatewayServiceGrpc.IdentityGatewayServiceImplBase {
 
     private final UserService service ;
+    private static final Logger log = LoggerFactory.getLogger(IdentityGrpcService.class);
 
     public IdentityGrpcService(UserService service) {
         this.service = service ;
@@ -101,7 +104,7 @@ public class IdentityGrpcService extends IdentityGatewayServiceGrpc.IdentityGate
     public void getUserProfile(GetUserRequest request, StreamObserver<ProfileData> responseObserver) {
 
         Profile profile = service.getUserProfile(request.getUserId());
-
+        log.info("got the profile from the user service");
         // Converted OffsetDateTime to com.google.protobuf.Timestamp, as proto buffers cannot understand
         // standard java templates
         java.time.Instant instant = profile.createdAt().toInstant();
@@ -109,18 +112,18 @@ public class IdentityGrpcService extends IdentityGatewayServiceGrpc.IdentityGate
                 .setSeconds(instant.getEpochSecond())
                 .setNanos(instant.getNano())
                 .build();
-
+        log.info("converted the OffetDateTime to com.google.protobuf.Timestamp");
         ProfileData resp = ProfileData.newBuilder()
                 .setUserId(profile.userId())
-                .setBio(profile.bio())
-                .setName(profile.name())
-                .setUsername(profile.name())
+                .setBio(profile.bio() != null ? profile.bio() : "")
+                .setName(profile.name() != null ? profile.name() : "")
+                .setUsername(profile.username() != null ? profile.username() : "")
                 .setFollowersCount(profile.followersCount())
                 .setFollowingCount(profile.followingCount())
-                .setProfilePic(profile.profilePicUrl())
+                .setProfilePic(profile.profilePicUrl() != null ? profile.profilePicUrl() : "")
                 .setJoinedAt(joinedAtTimestamp)
                 .build() ;
-
+        log.info("Response was ready to be executed");
         responseObserver.onNext(resp);
         responseObserver.onCompleted();
 
@@ -134,9 +137,9 @@ public class IdentityGrpcService extends IdentityGatewayServiceGrpc.IdentityGate
            for (ProfileDetails profile : profileDetails) {
                resp.addUsers(UserDetails.newBuilder()
                        .setUserId(profile.userId())
-                       .setName(profile.name())
-                       .setUsername(profile.username())
-                       .setProfilePic(profile.profilePicUrl())
+                       .setName(profile.name() != null ? profile.name() : "")
+                       .setUsername(profile.username() != null ? profile.username() : "")
+                       .setProfilePic(profile.profilePicUrl() != null ? profile.profilePicUrl() : "")
                        .build()) ;
            }
 
@@ -161,12 +164,12 @@ public class IdentityGrpcService extends IdentityGatewayServiceGrpc.IdentityGate
         for (ProfileDetails profile : profileDetails) {
             resp.addUsers(UserDetails.newBuilder()
                     .setUserId(profile.userId())
-                    .setName(profile.name())
-                    .setUsername(profile.username())
-                    .setProfilePic(profile.profilePicUrl())
+                    .setName(profile.name() != null ? profile.name() : "")
+                    .setUsername(profile.username() != null ? profile.username() : "")
+                    .setProfilePic(profile.profilePicUrl() != null ? profile.profilePicUrl() : "")
                     .build()) ;
             index += 1 ;
-            if (index == request.getLimit()) {
+            if (index == profileDetails.size()) {
                 lastCursor = profile.createdAt() ;
             }
         }
@@ -188,12 +191,12 @@ public class IdentityGrpcService extends IdentityGatewayServiceGrpc.IdentityGate
         for (ProfileDetails profile : profileDetails) {
             resp.addUsers(UserDetails.newBuilder()
                     .setUserId(profile.userId())
-                    .setName(profile.name())
-                    .setUsername(profile.username())
-                    .setProfilePic(profile.profilePicUrl())
+                    .setName(profile.name() != null ? profile.name() : "")
+                    .setUsername(profile.username() != null ? profile.username() : "")
+                    .setProfilePic(profile.profilePicUrl() != null ? profile.profilePicUrl() : "")
                     .build()) ;
             index += 1 ;
-            if (index == request.getLimit()) {
+            if (index == profileDetails.size()) {
                 lastCursor = profile.createdAt() ;
             }
         }
