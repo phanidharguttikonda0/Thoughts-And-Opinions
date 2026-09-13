@@ -14,6 +14,7 @@ import com.ThoughtsAndOpinions.IdentityService.utils.CursorUtils;
 import identity.SignUpRequest;
 import jakarta.transaction.Transactional;
 
+import org.slf4j.LoggerFactory;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
@@ -24,7 +25,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
-import java.util.concurrent.atomic.AtomicReference;
+import java.util.logging.Logger;
 
 @Service
 public class UserService {
@@ -33,6 +34,7 @@ public class UserService {
     private final JwtService jwt ;
     private final PasswordEncoder passwordEncoder ;
     private final FollowerRepository followerRepo ;
+    private static final Logger log = (Logger) LoggerFactory.getLogger(UserService.class);
 
     public UserService(UserRepository repo, FollowerRepository followerRepo,JwtService jwt, PasswordEncoder passwordEncoder) {
         this.userRepo = repo ;
@@ -47,21 +49,24 @@ public class UserService {
         Optional<UserEntity> usernameCheck = userRepo.findByUsername(userDetails.getUsername()) ;
 
         if (usernameCheck.isPresent()) {
+            log.warning("Username already exists during sign up check : "+userDetails.getUsername());
             throw new UserExistsException(UserExistsType.USERNAME);
         }
 
         Optional<UserEntity> userEmailCheck = userRepo.findByEmail(userDetails.getEmail()) ;
 
         if (userEmailCheck.isPresent()) {
+            log.warning("Email already exists during sign in check : "+userDetails.getEmail());
             throw new UserExistsException(UserExistsType.EMAIL);
         }
 
-        String hashedPassword = passwordEncoder.encode(userDetails.getPassword()) ;
 
+        String hashedPassword = passwordEncoder.encode(userDetails.getPassword()) ;
+        log.info("password was hashed successfully");
         UserEntity user = userRepo.save(new UserEntity(userDetails.getUsername(), userDetails.getEmail(), hashedPassword)) ;
 
         // creating a jwt token
-
+        log.info("user was save and going to generate token");
         String token = jwt.genrateToken(user.getUsername(), user.getId()) ;
 
         return new AuthenticationResponse(user.getId(), token) ;
@@ -71,15 +76,18 @@ public class UserService {
     public AuthenticationResponse authenticateUser(String username, String password) {
         // let's hash the password
         String hashedPassword = passwordEncoder.encode(password) ;
-
+        log.info("password was hashed : "+hashedPassword);
         Optional<UserEntity> user = userRepo.findByUsername(username) ;
 
         if(user.isEmpty()) {
+            log.info("user not found during sign up");
             throw new UserNotFoundException("username : "+username+" not found") ;
         }else if (user.get().getPasswordHash() != hashedPassword) {
+            log.info("Password Match Failed, Incorrect Password");
             throw new InCorrectCredentials("Invalid Credentials Passed") ;
         }
 
+        log.info("generating the jwt token");
         String token = jwt.genrateToken(username, user.get().getId()) ;
 
         return new AuthenticationResponse(user.get().getId(), token) ;
