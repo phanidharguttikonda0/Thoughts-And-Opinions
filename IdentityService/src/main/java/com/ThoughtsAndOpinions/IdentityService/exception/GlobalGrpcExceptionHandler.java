@@ -5,6 +5,9 @@ import io.grpc.StatusException;
 import org.jspecify.annotations.Nullable;
 import org.springframework.grpc.server.exception.GrpcExceptionHandler;
 
+import org.springframework.stereotype.Component;
+
+@Component
 public class GlobalGrpcExceptionHandler implements GrpcExceptionHandler {
 
     @Override
