@@ -2,20 +2,31 @@ spring:
   application:
     name: IdentityService
 
-  # Corrected gRPC configuration block
+  # 1. DATABASE CONFIGURATION (PostgreSQL)
+  datasource:
+    url: jdbc:postgresql://localhost:5432/identity_db
+    username: admin
+    password: admin_password
+    driver-class-name: org.postgresql.Driver
+    hikari:
+      maximum-pool-size: 20
+      minimum-idle: 5
+      idle-timeout: 600000 # 10 minutes in milliseconds
+      max-lifetime: 1800000 # 30 minutes in millisecond
+
+  # 2. JPA & HIBERNATE CONFIGURATION
+  jpa:
+    hibernate:
+      ddl-auto: update
+
+  # 3. gRPC CONFIGURATION
   grpc:
     server:
       port: 9090
 
-  # 1. DATABASE CONFIGURATION (PostgreSQL)
-  datasource:
-    url: jdbc:postgresql://localhost:5432/identity_db?currentSchema=identity_db
-    username: admin
-    password: admin_password
-  env:
-    - name: SNOWFLAKE_WORKER_ID
-      valueFrom:
-        fieldRef:
-          fieldPath: metadata.name # K8s pods names end in numeric values (e.g., pod-0, pod-1)
-  # java -Dsnowflake.worker-id=1 -jar app.jar , when running the jar file we pass the worker id
-  # so in different servers , if occurs in the same time. This worker Id make sure no collision
+# 4. SNOWFLAKE DISTRIBUTED CONFIGURATION
+# This maps the environment variable when running on Kubernetes/Docker,
+# and defaults to '1' when running locally on your laptop.
+snowflake:
+  worker-id: ${SNOWFLAKE_WORKER_ID:1}
+  datacenter-id: ${SNOWFLAKE_DATACENTER_ID:1}

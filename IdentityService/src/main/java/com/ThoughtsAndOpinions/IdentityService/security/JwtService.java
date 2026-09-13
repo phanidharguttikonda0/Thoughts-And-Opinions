@@ -11,7 +11,7 @@ import java.util.Date;
 public class JwtService {
     private final String SECRET_KEY = "your-extremely-long-and-secure-private-secret-key";
 
-    public String genrateToken(String username, Long user_id) {
+    public String generateToken(String username, Long user_id) {
         return Jwts.builder()
                 .subject(username)
                 .claim("user_id", user_id)

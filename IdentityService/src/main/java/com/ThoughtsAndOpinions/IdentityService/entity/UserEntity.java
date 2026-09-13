@@ -1,16 +1,15 @@
 package com.ThoughtsAndOpinions.IdentityService.entity;
 
-
 import com.ThoughtsAndOpinions.IdentityService.utils.SnowflakeId;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
 import org.hibernate.annotations.CreationTimestamp;
 
-
 import java.time.OffsetDateTime;
 import java.util.HashSet;
 import java.util.Set;
+
 @Getter
 @Setter
 @Entity
@@ -55,12 +54,14 @@ public class UserEntity {
     @OneToMany(mappedBy = "following", cascade = CascadeType.ALL, orphanRemoval = true)
     private Set<FollowerEntity> followers = new HashSet<>();
 
-    public UserEntity() {}
+    public UserEntity() {
+    }
 
-    public UserEntity(String username, String email, String passwordHash) {
-        this.username = username ;
+    public UserEntity(String username, String email, String passwordHash, String name) {
+        this.username = username;
         this.email = email;
-        this.passwordHash = passwordHash ;
+        this.passwordHash = passwordHash;
+        this.name = name ;
     }
 
     // Helper methods to keep relationships in sync

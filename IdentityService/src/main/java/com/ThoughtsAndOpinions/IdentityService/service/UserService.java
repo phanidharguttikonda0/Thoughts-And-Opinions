@@ -64,32 +64,31 @@ public class UserService {
 
         String hashedPassword = passwordEncoder.encode(userDetails.getPassword()) ;
         log.info("password was hashed successfully");
-        UserEntity user = userRepo.save(new UserEntity(userDetails.getUsername(), userDetails.getEmail(), hashedPassword)) ;
+        UserEntity user = userRepo.save(new UserEntity(userDetails.getUsername(), userDetails.getEmail(), hashedPassword, userDetails.getName())) ;
         // when we are saving the user at that time the snowflake id is injected by the hibernate.
         // creating a jwt token
         log.info("user was save and going to generate token");
-        String token = jwt.genrateToken(user.getUsername(), user.getId()) ;
+        String token = jwt.generateToken(user.getUsername(), user.getId()) ;
 
         return new AuthenticationResponse(user.getId(), token) ;
 
     }
 
     public AuthenticationResponse authenticateUser(String username, String password) {
-        // let's hash the password
-        String hashedPassword = passwordEncoder.encode(password) ;
-        log.info("password was hashed : {}", hashedPassword);
         Optional<UserEntity> user = userRepo.findByUsername(username) ;
 
         if(user.isEmpty()) {
-            log.info("user not found during sign up");
+            log.info("user not found during sign in");
             throw new UserNotFoundException("username : "+username+" not found") ;
-        }else if (user.get().getPasswordHash() != hashedPassword) {
+        }
+        
+        if (!passwordEncoder.matches(password, user.get().getPasswordHash())) {
             log.info("Password Match Failed, Incorrect Password");
             throw new InCorrectCredentials("Invalid Credentials Passed") ;
         }
 
         log.info("generating the jwt token");
-        String token = jwt.genrateToken(username, user.get().getId()) ;
+        String token = jwt.generateToken(username, user.get().getId()) ;
 
         return new AuthenticationResponse(user.get().getId(), token) ;
     }
