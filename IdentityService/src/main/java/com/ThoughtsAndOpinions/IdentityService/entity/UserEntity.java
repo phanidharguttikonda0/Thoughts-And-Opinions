@@ -1,9 +1,13 @@
 package com.ThoughtsAndOpinions.IdentityService.entity;
 
+
+import com.ThoughtsAndOpinions.IdentityService.utils.SnowflakeId;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
 import org.hibernate.annotations.CreationTimestamp;
+
+
 import java.time.OffsetDateTime;
 import java.util.HashSet;
 import java.util.Set;
@@ -14,6 +18,8 @@ import java.util.Set;
 public class UserEntity {
 
     @Id
+    @SnowflakeId
+    @Column(name = "id", nullable = false, updatable = false)
     private Long id; // Manually assigned (e.g., Snowflake ID)
 
     @Column(unique = true, nullable = false, length = 60)

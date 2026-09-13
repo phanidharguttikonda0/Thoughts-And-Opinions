@@ -12,3 +12,10 @@ spring:
     url: jdbc:postgresql://localhost:5432/identity_db?currentSchema=identity_db
     username: admin
     password: admin_password
+  env:
+    - name: SNOWFLAKE_WORKER_ID
+      valueFrom:
+        fieldRef:
+          fieldPath: metadata.name # K8s pods names end in numeric values (e.g., pod-0, pod-1)
+  # java -Dsnowflake.worker-id=1 -jar app.jar , when running the jar file we pass the worker id
+  # so in different servers , if occurs in the same time. This worker Id make sure no collision
