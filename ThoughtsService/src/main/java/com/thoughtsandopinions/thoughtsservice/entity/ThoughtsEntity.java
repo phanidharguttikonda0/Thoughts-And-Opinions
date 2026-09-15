@@ -1,6 +1,9 @@
 package com.thoughtsandopinions.thoughtsservice.entity;
 
 
+import com.thoughtsandopinions.thoughtsservice.exception.DuplicatedLikeException;
+import com.thoughtsandopinions.thoughtsservice.exception.InvalidThoughtException;
+import com.thoughtsandopinions.thoughtsservice.exception.NoLikeRemoveException;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -55,14 +58,18 @@ public class ThoughtsEntity implements Serializable {
     @OneToMany(mappedBy = "thought", cascade = CascadeType.ALL, orphanRemoval = true)
     private Set<LikesEntity> likedUsers = new HashSet<>() ;
 
+
+    // no need of orphanRemoval, because we are not removing media. media cannot be removed.
+    // orphan removal is only used, when we removed the entity from parents list , then it should
+    // be removed in the database or not. depends on whether orphanRemoval is true or false.
     @OneToMany(mappedBy = "thought", cascade = CascadeType.PERSIST) // we only need to save media automatically to db
     private Set<MediaEntity> media =  new HashSet<>();
 
     public ThoughtsEntity(UsersEntity user, String content, ThoughtsEntity parentThought) {
         this.user = user ;
         if (content == null && parentThought == null) {
-            // need throw an Custom Exception (InvalidThoughtException)
-            throw new IllegalArgumentException("Content and parentThought cannot both be absent");
+            // throwing an Custom Exception (InvalidThoughtException)
+            throw new InvalidThoughtException("Content and parentThought cannot both be absent");
         }else{
             if(content != null) {
                 this.content = content ;
@@ -81,7 +88,7 @@ public class ThoughtsEntity implements Serializable {
             likedUsers.add(like) ;
             this.likesCount += 1 ;
         }else{
-            // need throw a exception, already liked
+            throw new DuplicatedLikeException("Already Liked the Post") ;
         }
     }
 
@@ -93,7 +100,7 @@ public class ThoughtsEntity implements Serializable {
             likedUsers.remove(likedEntity.get()) ;
             this.likesCount -= 1 ;
         }else{
-            // throwing Exception, not liked to remove a like
+            throw new NoLikeRemoveException("No like exists, to unlike") ;
         }
     }
 
