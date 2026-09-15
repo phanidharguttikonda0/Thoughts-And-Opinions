@@ -3,8 +3,8 @@ package com.ThoughtsAndOpinions.IdentityService.entity;
 import jakarta.persistence.Column;
 import jakarta.persistence.Embeddable;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 import lombok.Setter;
-
 import java.io.Serializable;
 import java.util.Objects;
 
@@ -15,6 +15,7 @@ import java.util.Objects;
 * */
 @Getter
 @Setter
+@NoArgsConstructor
 @Embeddable
 public class FollowerId implements Serializable {
 
@@ -24,19 +25,10 @@ public class FollowerId implements Serializable {
     @Column(name = "following_id")
     private Long followingId;
 
-    // Required by JPA: no-args constructor
-    public FollowerId() {}
-
     public FollowerId(Long followerId, Long followingId) {
         this.followerId = followerId;
         this.followingId = followingId;
     }
-
-    // Getters and Setters
-    public Long getFollowerId() { return followerId; }
-    public void setFollowerId(Long followerId) { this.followerId = followerId; }
-    public Long getFollowingId() { return followingId; }
-    public void setFollowingId(Long followingId) { this.followingId = followingId; }
 
     // equals and hashCode are mandatory for composite keys
     @Override

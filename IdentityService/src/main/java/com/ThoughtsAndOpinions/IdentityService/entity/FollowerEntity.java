@@ -3,12 +3,14 @@ package com.ThoughtsAndOpinions.IdentityService.entity;
 
 import jakarta.persistence.*;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 import lombok.Setter;
 import org.hibernate.annotations.CreationTimestamp;
 import java.time.OffsetDateTime;
 
 @Getter
 @Setter
+@NoArgsConstructor
 @Entity
 @Table(name = "followers", schema = "identity_db")
 public class FollowerEntity {
@@ -32,7 +34,6 @@ public class FollowerEntity {
     @Column(name = "created_at", updatable = false)
     private OffsetDateTime createdAt;
 
-    public FollowerEntity() {}
 
     public FollowerEntity(UserEntity follower, UserEntity following) {
         this.follower = follower;
