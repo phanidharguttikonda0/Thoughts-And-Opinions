@@ -9,6 +9,7 @@ service ThoughtGatewayService {
   rpc likeThought (LikeRequest) returns (google.protobuf.Empty);              // POST /thoughts/{id}/like
   rpc unlikeThought (LikeRequest) returns (google.protobuf.Empty);            // DELETE /thoughts/{id}/like
 
+  rpc storeUser(Users) returns (google.protobuf.Empty) ;
 
   // GET /thoughts/{id}/likes?cursor=
   rpc getThoughtLikes (GetLikesRequest) returns (GetLikesResponse);
@@ -31,6 +32,8 @@ message CreateRequest {
   optional int64 parent_thought_id = 3; // it can be null, if it is a first post
   // we will send notification to the user whose parent_thought_id was mentioned.
   // it's like a reply for him
+  repeated string media_urls = 4; // for a thought we can attach media. The API gateway stores that
+  // and sends urls.
 }
 
 message CreateResponse {
@@ -59,7 +62,8 @@ message GetThoughtResponse {
   int32 likes_count = 4;
   int32 opinions_count = 5; // when we click on opinions, we will return list of opinions via cursor pagination
   int32 reposts_count = 6;
-  google.protobuf.Timestamp createdAt = 7;
+  int64 parent_thought_id = 7;
+  google.protobuf.Timestamp createdAt = 8;
 }
 
 message GetLikesRequest {
@@ -97,8 +101,18 @@ message GetUserHistoryRequest {
   optional string cursor = 3 ;
 }
 
+message ThoughtDetails {
+  int64 thought_id = 1;
+  string content = 2;
+  int32 likes_count = 3;
+  int32 opinions_count = 4; // when we click on opinions, we will return list of opinions via cursor pagination
+  int32 reposts_count = 5;
+  int64 parent_thought_id = 6;
+  google.protobuf.Timestamp createdAt = 7;
+}
+
 message GetHistoryResponse {
-  repeated GetThoughtResponse thoughts_list = 1 ; // we are going to return the list of thoughts and opinions of the user
+  repeated ThoughtDetails thoughts_list = 1 ; // we are going to return the list of thoughts and opinions of the user
   string next_cursor = 2 ;
 }
 

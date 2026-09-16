@@ -7,7 +7,6 @@ import com.google.protobuf.Empty;
 import identity.*;
 import identity.IdentityGatewayServiceGrpc;
 import io.grpc.stub.StreamObserver;
-import jakarta.transaction.Transactional;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.grpc.server.service.GrpcService;

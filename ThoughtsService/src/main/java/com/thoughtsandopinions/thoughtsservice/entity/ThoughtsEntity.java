@@ -4,6 +4,7 @@ package com.thoughtsandopinions.thoughtsservice.entity;
 import com.thoughtsandopinions.thoughtsservice.exception.DuplicatedLikeException;
 import com.thoughtsandopinions.thoughtsservice.exception.InvalidThoughtException;
 import com.thoughtsandopinions.thoughtsservice.exception.NoLikeRemoveException;
+import com.thoughtsandopinions.thoughtsservice.utils.SnowflakeId;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -24,6 +25,8 @@ import java.util.Set;
 public class ThoughtsEntity implements Serializable {
 
     @Id
+    @SnowflakeId
+    @Column(name = "id", nullable = false, updatable = false)
     private long id; // we are going to generate the Snowflake id here
 
     @ManyToOne(fetch = FetchType.LAZY)
@@ -62,7 +65,7 @@ public class ThoughtsEntity implements Serializable {
     // no need of orphanRemoval, because we are not removing media. media cannot be removed.
     // orphan removal is only used, when we removed the entity from parents list , then it should
     // be removed in the database or not. depends on whether orphanRemoval is true or false.
-    @OneToMany(mappedBy = "thought", cascade = CascadeType.PERSIST) // we only need to save media automatically to db
+    @OneToMany(mappedBy = "thought", cascade = CascadeType.PERSIST, orphanRemoval = true) // we only need to save media automatically to db
     private Set<MediaEntity> media =  new HashSet<>();
 
     public ThoughtsEntity(UsersEntity user, String content, ThoughtsEntity parentThought) {

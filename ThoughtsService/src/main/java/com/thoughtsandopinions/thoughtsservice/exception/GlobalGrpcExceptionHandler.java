@@ -25,6 +25,14 @@ public class GlobalGrpcExceptionHandler implements GrpcExceptionHandler{
             return Status.NOT_FOUND.withDescription("No Like to Unlike").asException();
         }
 
+        if (exception instanceof UserNotFoundException) {
+            return Status.NOT_FOUND.withDescription("User Not Found").asException();
+        }
+
+        if(exception instanceof  ThoughtNotFoundException) {
+            return Status.NOT_FOUND.withDescription("Thought Not Found").asException();
+        }
+
 
         // Fallback for any other unhandled business or internal exceptions
         return Status.INTERNAL

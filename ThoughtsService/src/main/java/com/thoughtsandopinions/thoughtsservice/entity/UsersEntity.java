@@ -1,6 +1,7 @@
 package com.thoughtsandopinions.thoughtsservice.entity;
 
 
+import com.thoughtsandopinions.thoughtsservice.utils.SnowflakeId;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -20,6 +21,7 @@ import java.util.Set;
 public class UsersEntity implements Serializable {
 
     @Id
+    @Column(name = "id", nullable = false, updatable = false)
     private long id; // we are going set id, passed by the identity service
 
     @Column(length = 60, nullable = false, unique = true)

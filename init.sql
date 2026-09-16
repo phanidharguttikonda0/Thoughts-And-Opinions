@@ -84,10 +84,8 @@ CREATE TABLE mentions (
                           PRIMARY KEY (user_id, thought_id)
 );
 
--- No ON DELETE CASCADE here on purpose: media files in MinIO need
--- to be cleaned up explicitly by the app before/independent of the row.
 CREATE TABLE media (
-                       thought_id   BIGINT REFERENCES thoughts(id),
+                       thought_id   BIGINT REFERENCES thoughts(id) ON DELETE CASCADE,
                        media_url    TEXT NOT NULL,
                        created_at   TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
                        PRIMARY KEY (thought_id, media_url)
