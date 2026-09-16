@@ -3,7 +3,6 @@ package com.thoughtsandopinions.thoughtsservice.service;
 import com.thoughtsandopinions.thoughtsservice.entity.ThoughtsEntity;
 import com.thoughtsandopinions.thoughtsservice.entity.UsersEntity;
 import com.thoughtsandopinions.thoughtsservice.exception.ThoughtNotFoundException;
-import com.thoughtsandopinions.thoughtsservice.exception.UserNotFoundException;
 import com.thoughtsandopinions.thoughtsservice.model.Thought;
 import com.thoughtsandopinions.thoughtsservice.model.ThoughtDetails;
 import com.thoughtsandopinions.thoughtsservice.model.UserActivitySummary;
@@ -44,8 +43,13 @@ public class ThoughtsService {
 
 
     @Transactional
-    public void getThoughtOpinions(long thoughtId, int limit, String cursor) {
+    public List<ThoughtDetails> getThoughtOpinions(long thoughtId, int limit, String cursor) {
 
+        OffsetDateTime time = CursorUtils.decodeCursor(cursor) ;
+
+        List<ThoughtDetails> opinions = thoughtsRepo.findOpinionsByThoughtId(thoughtId, time, Pageable.ofSize(limit)) ;
+
+        return opinions ;
     }
 
 
@@ -85,7 +89,6 @@ public class ThoughtsService {
     public List<Thought> getUserThoughtHistory(long userId, int limit, String cursor) {
 
         OffsetDateTime time = CursorUtils.decodeCursor(cursor) ;
-        // we need to go with query based approach for getting list of thoughts of a particular user
 
         List<Thought> thoughts =  thoughtsRepo.findThoughtsOfUser(userId, time, Pageable.ofSize(limit)) ;
 

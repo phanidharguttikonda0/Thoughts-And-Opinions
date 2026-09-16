@@ -3,6 +3,7 @@ package com.thoughtsandopinions.thoughtsservice.repository;
 
 import com.thoughtsandopinions.thoughtsservice.entity.ThoughtsEntity;
 import com.thoughtsandopinions.thoughtsservice.model.Thought;
+import com.thoughtsandopinions.thoughtsservice.model.ThoughtDetails;
 import com.thoughtsandopinions.thoughtsservice.model.UserActivitySummary;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
@@ -53,33 +54,29 @@ public interface ThoughtsRepository extends JpaRepository<ThoughtsEntity, Long> 
             Pageable pageable
     );
 
-
-/*
-*    private long id; // we are going to generate the Snowflake id here
-
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "user_id", nullable = false)
-    private UsersEntity user;
-
-    @Column(length = 512)
-    String content ;
-
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "parent_thought_id")
-    private ThoughtsEntity parentThought ;
-
-    @Column(name = "likes_count")
-    private int likesCount ;
-
-    @Column(name = "opinions_count")
-    private int opinionsCount ;
-
-    @Column(name = "reposts_count")
-    private int repostsCount ;
-
-    @Column(name = "created_at")
-    private OffsetDateTime createdAt ;
-*
-* */
-
+    @Query("""
+        SELECT new com.thoughtsandopinions.thoughtsservice.model.ThoughtDetails(
+            t.id,
+            u.username,
+            u.id,
+            u.name,
+            u.profilePicUrl,
+            t.content,
+            t.parentThought.id,
+            t.likesCount,
+            t.opinionsCount,
+            t.repostsCount,
+            t.createdAt
+        )
+        FROM ThoughtsEntity t
+        JOIN t.user u
+        WHERE t.parentThought.id = :thoughtId AND t.content is not null
+          AND (cast(:cursor as java.time.OffsetDateTime) IS NULL OR t.createdAt < :cursor)
+        ORDER BY t.createdAt DESC
+    """)
+    List<ThoughtDetails> findOpinionsByThoughtId(
+            @Param("thoughtId") long thoughtId,
+            @Param("cursor") OffsetDateTime cursor,
+            Pageable pageable
+    );
 }

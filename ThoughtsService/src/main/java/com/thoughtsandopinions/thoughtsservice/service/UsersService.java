@@ -5,8 +5,6 @@ import com.thoughtsandopinions.thoughtsservice.entity.ThoughtsEntity;
 import com.thoughtsandopinions.thoughtsservice.entity.UsersEntity;
 import com.thoughtsandopinions.thoughtsservice.exception.ThoughtNotFoundException;
 import com.thoughtsandopinions.thoughtsservice.exception.UserNotFoundException;
-import com.thoughtsandopinions.thoughtsservice.model.Thought;
-import com.thoughtsandopinions.thoughtsservice.model.ThoughtDetails;
 import com.thoughtsandopinions.thoughtsservice.model.ThoughtsResponse;
 import com.thoughtsandopinions.thoughtsservice.repository.ThoughtsRepository;
 import com.thoughtsandopinions.thoughtsservice.repository.UsersRepository;
