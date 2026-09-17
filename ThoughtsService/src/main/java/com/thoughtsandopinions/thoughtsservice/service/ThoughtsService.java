@@ -45,7 +45,10 @@ public class ThoughtsService {
     @Transactional
     public List<ThoughtDetails> getThoughtOpinions(long thoughtId, int limit, String cursor) {
 
-        OffsetDateTime time = CursorUtils.decodeCursor(cursor) ;
+        OffsetDateTime time = null ;
+        if(cursor != null || cursor.isEmpty()){
+            time = CursorUtils.decodeCursor(cursor) ;
+        }
 
         List<ThoughtDetails> opinions = thoughtsRepo.findOpinionsByThoughtId(thoughtId, time, Pageable.ofSize(limit)) ;
 
@@ -56,7 +59,10 @@ public class ThoughtsService {
     @Transactional
     public List<UserActivitySummary> getThoughtReposts(long thoughtId, int limit, String cursor) {
 
-        OffsetDateTime time = CursorUtils.decodeCursor(cursor) ;
+        OffsetDateTime time = null ;
+        if(cursor != null || cursor.isEmpty()){
+            time = CursorUtils.decodeCursor(cursor) ;
+        }
 
         List<UserActivitySummary> repostedUsers = thoughtsRepo.findRepostedUsers(thoughtId, time, Pageable.ofSize(limit)) ;
 
@@ -88,7 +94,10 @@ public class ThoughtsService {
     @Transactional
     public List<Thought> getUserThoughtHistory(long userId, int limit, String cursor) {
 
-        OffsetDateTime time = CursorUtils.decodeCursor(cursor) ;
+        OffsetDateTime time = null ;
+        if(cursor != null || cursor.isEmpty()){
+            time = CursorUtils.decodeCursor(cursor) ;
+        }
 
         List<Thought> thoughts =  thoughtsRepo.findThoughtsOfUser(userId, time, Pageable.ofSize(limit)) ;
 
