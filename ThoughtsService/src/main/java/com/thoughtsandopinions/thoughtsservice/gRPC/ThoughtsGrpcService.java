@@ -94,19 +94,23 @@ public class ThoughtsGrpcService extends ThoughtGatewayServiceGrpc.ThoughtGatewa
         int i = 0 ;
         String lastCursor = null;
         for (UserActivitySummary activity : likedUsers) {
-            resp.addLikedUsers(Thoughts.Users.newBuilder()
+            Thoughts.Users.Builder userBuilder = Thoughts.Users.newBuilder()
                     .setUserId(activity.getUserId())
                     .setUsername(activity.getUsername())
-                    .setName(activity.getName())
-                    .setProfilePicUrl(activity.getProfilePicUrl())
-            ) ;
+                    .setName(activity.getName());
+            if (activity.getProfilePicUrl() != null) {
+                userBuilder.setProfilePicUrl(activity.getProfilePicUrl());
+            }
+            resp.addLikedUsers(userBuilder) ;
             if (i == likedUsers.size()-1) {
                 lastCursor = CursorUtils.encodeCursor(activity.getActivityCreatedAt()) ;
             }
             i += 1 ;
         }
 
-        resp.setNextCursor(lastCursor) ;
+        if (lastCursor != null) {
+            resp.setNextCursor(lastCursor) ;
+        }
 
         responseObserver.onNext(resp.build());
         responseObserver.onCompleted();
@@ -139,12 +143,16 @@ public class ThoughtsGrpcService extends ThoughtGatewayServiceGrpc.ThoughtGatewa
                     .setNanos(instant.getNano())
                     .build();
 
+            Thoughts.Users.Builder userBuilder = Thoughts.Users.newBuilder()
+                    .setUserId(t.getUserId())
+                    .setUsername(t.getUsername())
+                    .setName(t.getName());
+            if (t.getProfilePicUrl() != null) {
+                userBuilder.setProfilePicUrl(t.getProfilePicUrl());
+            }
+
             resp.addOpinionsList(Thoughts.GetThoughtResponse.newBuilder().
-                    setUser(Thoughts.Users.newBuilder()
-                            .setUserId(t.getUserId())
-                            .setUsername(t.getUsername())
-                            .setName(t.getName())
-                            .setProfilePicUrl(t.getProfilePicUrl()).build())
+                    setUser(userBuilder.build())
                     .setThoughtId(t.getThoughtId())
                     .setContent(t.getContent())
                     .setLikesCount(t.getLikesCount())
@@ -161,7 +169,9 @@ public class ThoughtsGrpcService extends ThoughtGatewayServiceGrpc.ThoughtGatewa
             i += 1 ;
         }
 
-        resp.setNextCursor(lastCursor) ;
+        if (lastCursor != null) {
+            resp.setNextCursor(lastCursor) ;
+        }
 
         responseObserver.onNext(resp.build());
         responseObserver.onCompleted();
@@ -202,7 +212,9 @@ public class ThoughtsGrpcService extends ThoughtGatewayServiceGrpc.ThoughtGatewa
             i += 1 ;
         }
 
-        resp.setNextCursor(lastCursor) ;
+        if (lastCursor != null) {
+            resp.setNextCursor(lastCursor) ;
+        }
 
         responseObserver.onNext(resp.build());
         responseObserver.onCompleted();
@@ -216,12 +228,14 @@ public class ThoughtsGrpcService extends ThoughtGatewayServiceGrpc.ThoughtGatewa
 
         Thoughts.GetThoughtResponse.Builder resp = Thoughts.GetThoughtResponse.newBuilder() ;
 
-        resp.setUser(Thoughts.Users.newBuilder()
+        Thoughts.Users.Builder userBuilder = Thoughts.Users.newBuilder()
                 .setUserId(thought.getUserId())
                 .setUsername(thought.getUsername())
-                .setName(thought.getName())
-                .setProfilePicUrl(thought.getProfilePicUrl()).build()
-        );
+                .setName(thought.getName());
+        if (thought.getProfilePicUrl() != null) {
+            userBuilder.setProfilePicUrl(thought.getProfilePicUrl());
+        }
+        resp.setUser(userBuilder.build());
 
         resp.setThoughtId(thought.getThoughtId());
         resp.setContent(thought.getContent()) ;
@@ -252,19 +266,23 @@ public class ThoughtsGrpcService extends ThoughtGatewayServiceGrpc.ThoughtGatewa
         String lastCursor = null ;
         for(UserActivitySummary activity : repostedUsers) {
 
-            response.addRepostedUsersList(Thoughts.Users.newBuilder()
+            Thoughts.Users.Builder userBuilder = Thoughts.Users.newBuilder()
                     .setUserId(activity.getUserId())
                     .setUsername(activity.getUsername())
-                    .setName(activity.getName())
-                    .setProfilePicUrl(activity.getProfilePicUrl())
-            ) ;
+                    .setName(activity.getName());
+            if (activity.getProfilePicUrl() != null) {
+                userBuilder.setProfilePicUrl(activity.getProfilePicUrl());
+            }
+            response.addRepostedUsersList(userBuilder) ;
             if (i == repostedUsers.size()-1) {
                 lastCursor = CursorUtils.encodeCursor(activity.getActivityCreatedAt()) ;
             }
             i += 1 ;
         }
 
-        response.setNextCursor(lastCursor) ;
+        if (lastCursor != null) {
+            response.setNextCursor(lastCursor) ;
+        }
 
         responseObserver.onNext(response.build());
         responseObserver.onCompleted();

@@ -20,7 +20,7 @@ public interface LikesRepository extends JpaRepository<LikesEntity, LikesId> {
         FROM LikesEntity l
         JOIN l.user u
         WHERE l.thought.id = :thoughtId
-          AND (:cursor IS NULL OR l.createdAt < :cursor)
+          AND (cast(:cursor as java.time.OffsetDateTime) IS NULL OR l.createdAt < :cursor)
         ORDER BY l.createdAt DESC
     """)
         List<UserActivitySummary> findLikedUsers(
