@@ -102,7 +102,7 @@ public class ThoughtsGrpcService extends ThoughtGatewayServiceGrpc.ThoughtGatewa
                 userBuilder.setProfilePicUrl(activity.getProfilePicUrl());
             }
             resp.addLikedUsers(userBuilder) ;
-            if (i == likedUsers.size()-1) {
+            if (i == likedUsers.size()-1 && activity.getActivityCreatedAt() != null) {
                 lastCursor = CursorUtils.encodeCursor(activity.getActivityCreatedAt()) ;
             }
             i += 1 ;
@@ -137,12 +137,6 @@ public class ThoughtsGrpcService extends ThoughtGatewayServiceGrpc.ThoughtGatewa
 
         for(ThoughtDetails t : opinions) {
 
-            java.time.Instant instant = t.getCreatedAt().toInstant();
-            com.google.protobuf.Timestamp joinedAtTimestamp = com.google.protobuf.Timestamp.newBuilder()
-                    .setSeconds(instant.getEpochSecond())
-                    .setNanos(instant.getNano())
-                    .build();
-
             Thoughts.Users.Builder userBuilder = Thoughts.Users.newBuilder()
                     .setUserId(t.getUserId())
                     .setUsername(t.getUsername())
@@ -151,18 +145,31 @@ public class ThoughtsGrpcService extends ThoughtGatewayServiceGrpc.ThoughtGatewa
                 userBuilder.setProfilePicUrl(t.getProfilePicUrl());
             }
 
-            resp.addOpinionsList(Thoughts.GetThoughtResponse.newBuilder().
-                    setUser(userBuilder.build())
+            Thoughts.GetThoughtResponse.Builder opinionBuilder = Thoughts.GetThoughtResponse.newBuilder()
+                    .setUser(userBuilder.build())
                     .setThoughtId(t.getThoughtId())
-                    .setContent(t.getContent())
                     .setLikesCount(t.getLikesCount())
                     .setOpinionsCount(t.getOpinionsCount())
-                    .setRepostsCount(t.getRepostsCount())
-                    .setThoughtId(t.getThoughtId())
-                    .setParentThoughtId(t.getParentThoughtId())
-                    .setCreatedAt(joinedAtTimestamp) .build()) ;
+                    .setRepostsCount(t.getRepostsCount());
 
-            if (i == opinions.size()-1) {
+            if (t.getContent() != null) {
+                opinionBuilder.setContent(t.getContent());
+            }
+            if (t.getParentThoughtId() != null) {
+                opinionBuilder.setParentThoughtId(t.getParentThoughtId());
+            }
+            if (t.getCreatedAt() != null) {
+                java.time.Instant instant = t.getCreatedAt().toInstant();
+                com.google.protobuf.Timestamp joinedAtTimestamp = com.google.protobuf.Timestamp.newBuilder()
+                        .setSeconds(instant.getEpochSecond())
+                        .setNanos(instant.getNano())
+                        .build();
+                opinionBuilder.setCreatedAt(joinedAtTimestamp);
+            }
+
+            resp.addOpinionsList(opinionBuilder);
+
+            if (i == opinions.size()-1 && t.getCreatedAt() != null) {
                 lastCursor = CursorUtils.encodeCursor(t.getCreatedAt()) ;
             }
 
@@ -191,22 +198,30 @@ public class ThoughtsGrpcService extends ThoughtGatewayServiceGrpc.ThoughtGatewa
 
         for(Thought t : thoughts) {
 
-            java.time.Instant instant = t.getCreatedAt().toInstant();
-            com.google.protobuf.Timestamp joinedAtTimestamp = com.google.protobuf.Timestamp.newBuilder()
-                    .setSeconds(instant.getEpochSecond())
-                    .setNanos(instant.getNano())
-                    .build();
-
-            resp.addThoughtsList(Thoughts.ThoughtDetails.newBuilder().setThoughtId(t.getThoughtId())
-                    .setContent(t.getContent())
-                    .setParentThoughtId(t.getParentThoughtId())
+            Thoughts.ThoughtDetails.Builder thoughtBuilder = Thoughts.ThoughtDetails.newBuilder()
+                    .setThoughtId(t.getThoughtId())
                     .setLikesCount(t.getLikesCount())
                     .setRepostsCount(t.getRepostsCount())
-                    .setOpinionsCount(t.getOpinionsCount())
-                    .setCreatedAt(joinedAtTimestamp)
-            );
+                    .setOpinionsCount(t.getOpinionsCount());
 
-            if(i == thoughts.size()-1) {
+            if (t.getContent() != null) {
+                thoughtBuilder.setContent(t.getContent());
+            }
+            if (t.getParentThoughtId() != null) {
+                thoughtBuilder.setParentThoughtId(t.getParentThoughtId());
+            }
+            if (t.getCreatedAt() != null) {
+                java.time.Instant instant = t.getCreatedAt().toInstant();
+                com.google.protobuf.Timestamp joinedAtTimestamp = com.google.protobuf.Timestamp.newBuilder()
+                        .setSeconds(instant.getEpochSecond())
+                        .setNanos(instant.getNano())
+                        .build();
+                thoughtBuilder.setCreatedAt(joinedAtTimestamp);
+            }
+
+            resp.addThoughtsList(thoughtBuilder);
+
+            if(i == thoughts.size()-1 && t.getCreatedAt() != null) {
                 lastCursor = CursorUtils.encodeCursor(t.getCreatedAt()) ;
             }
             i += 1 ;
@@ -238,17 +253,25 @@ public class ThoughtsGrpcService extends ThoughtGatewayServiceGrpc.ThoughtGatewa
         resp.setUser(userBuilder.build());
 
         resp.setThoughtId(thought.getThoughtId());
-        resp.setContent(thought.getContent()) ;
         resp.setLikesCount(thought.getLikesCount()) ;
         resp.setOpinionsCount(thought.getOpinionsCount()) ;
         resp.setRepostsCount(thought.getRepostsCount()) ;
 
-        java.time.Instant instant = thought.getCreatedAt().toInstant();
-        com.google.protobuf.Timestamp joinedAtTimestamp = com.google.protobuf.Timestamp.newBuilder()
-                .setSeconds(instant.getEpochSecond())
-                .setNanos(instant.getNano())
-                .build();
-        resp.setCreatedAt(joinedAtTimestamp) ;
+        if (thought.getContent() != null) {
+            resp.setContent(thought.getContent()) ;
+        }
+        if (thought.getParentThoughtId() != null) {
+            resp.setParentThoughtId(thought.getParentThoughtId());
+        }
+
+        if (thought.getCreatedAt() != null) {
+            java.time.Instant instant = thought.getCreatedAt().toInstant();
+            com.google.protobuf.Timestamp joinedAtTimestamp = com.google.protobuf.Timestamp.newBuilder()
+                    .setSeconds(instant.getEpochSecond())
+                    .setNanos(instant.getNano())
+                    .build();
+            resp.setCreatedAt(joinedAtTimestamp) ;
+        }
 
         responseObserver.onNext(resp.build());
         responseObserver.onCompleted();
@@ -274,7 +297,7 @@ public class ThoughtsGrpcService extends ThoughtGatewayServiceGrpc.ThoughtGatewa
                 userBuilder.setProfilePicUrl(activity.getProfilePicUrl());
             }
             response.addRepostedUsersList(userBuilder) ;
-            if (i == repostedUsers.size()-1) {
+            if (i == repostedUsers.size()-1 && activity.getActivityCreatedAt() != null) {
                 lastCursor = CursorUtils.encodeCursor(activity.getActivityCreatedAt()) ;
             }
             i += 1 ;
