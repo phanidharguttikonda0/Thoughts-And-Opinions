@@ -26,7 +26,10 @@ public class LikesService {
     @Transactional
     public List<UserActivitySummary> getThoughtLikes(long thoughtId, int limit, String cursor) {
 
-        OffsetDateTime time = CursorUtils.decodeCursor(cursor) ;
+        OffsetDateTime time = null ;
+        if(cursor != null){
+            time = CursorUtils.decodeCursor(cursor) ;
+        }
         List<UserActivitySummary> likedUsers = repo.findLikedUsers(thoughtId, time, Pageable.ofSize(limit)) ;
 
         return likedUsers ;
