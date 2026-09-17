@@ -13,7 +13,7 @@ import java.util.Objects;
 @Setter
 @NoArgsConstructor
 @Entity
-@Table(name = "media", schema = "thoughts_db")
+@Table(name = "media")
 public class MediaEntity implements Serializable{
 
     @EmbeddedId
@@ -26,6 +26,7 @@ public class MediaEntity implements Serializable{
 
 
 
+    @org.hibernate.annotations.CreationTimestamp
     @Column(name = "created_at")
     private OffsetDateTime createdAt ;
 

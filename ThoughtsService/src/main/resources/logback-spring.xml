@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<configuration>
+
+    <!-- 1. Define the standard Console Output Appender -->
+    <appender name="CONSOLE" class="ch.qos.logback.core.ConsoleAppender">
+        <encoder>
+            <pattern>%d{yyyy-MM-dd HH:mm:ss.SSS} [%thread] %-5level %logger{36} - %msg%n</pattern>
+        </encoder>
+    </appender>
+
+    <!-- 2. Wrap the Console Appender with an ASYNC Appender -->
+    <appender name="ASYNC_CONSOLE" class="ch.qos.logback.classic.AsyncAppender">
+        <!-- Attach our standard console appender here -->
+        <appender-ref ref="CONSOLE" />
+
+        <!-- The capacity of the asynchronous blocking queue. Default is 256. -->
+        <queueSize>512</queueSize>
+
+        <!-- By default, when the queue has less than 20% capacity remaining, -->
+        <!-- it will drop TRACE, DEBUG, and INFO logs. Setting this to 0 keeps ALL logs. -->
+        <discardingThreshold>0</discardingThreshold>
+
+        <!-- Setting this to true captures the class name and line number, but slows down performance. -->
+        <includeCallerData>false</includeCallerData>
+
+        <!-- Maximum time to wait (in milliseconds) for the queue to flush during app shutdown -->
+        <maxFlushTime>1000</maxFlushTime>
+    </appender>
+
+    <!-- 3. Direct your entire application logs through the Async Appender -->
+    <root level="INFO">
+        <appender-ref ref="ASYNC_CONSOLE" />
+    </root>
+
+</configuration>

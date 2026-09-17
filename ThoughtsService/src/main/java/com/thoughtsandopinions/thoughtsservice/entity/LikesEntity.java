@@ -13,7 +13,7 @@ import java.util.Objects;
 @Setter
 @NoArgsConstructor
 @Entity
-@Table(name = "likes", schema = "thoughts_db")
+@Table(name = "likes")
 public class LikesEntity implements Serializable {
 
     @EmbeddedId
@@ -29,6 +29,7 @@ public class LikesEntity implements Serializable {
     @JoinColumn(name = "user_id")
     private UsersEntity user ;
 
+    @org.hibernate.annotations.CreationTimestamp
     @Column(name = "created_at")
     private OffsetDateTime createdAt; // this is set, after like count was inserted in database.
 

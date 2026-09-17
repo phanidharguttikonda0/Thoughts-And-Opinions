@@ -13,7 +13,7 @@ import java.util.Objects;
 @Setter
 @NoArgsConstructor
 @Entity
-@Table(name = "mentions", schema = "thoughts_db")
+@Table(name = "mentions")
 public class MentionsEntity implements Serializable {
 
     @EmbeddedId
@@ -29,6 +29,7 @@ public class MentionsEntity implements Serializable {
     @JoinColumn(name = "thought_id")
     private ThoughtsEntity thought ;
 
+    @org.hibernate.annotations.CreationTimestamp
     @Column(name = "created_at")
     private OffsetDateTime createdAt ;
 

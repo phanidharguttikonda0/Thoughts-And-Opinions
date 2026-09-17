@@ -21,7 +21,7 @@ import java.util.Set;
 @Setter
 @NoArgsConstructor
 @Entity
-@Table(name = "thoughts", schema = "thoughts_db")
+@Table(name = "thoughts")
 public class ThoughtsEntity implements Serializable {
 
     @Id
@@ -49,7 +49,8 @@ public class ThoughtsEntity implements Serializable {
     @Column(name = "reposts_count")
     private int repostsCount ;
 
-    @Column(name = "created_at")
+    @org.hibernate.annotations.CreationTimestamp
+    @Column(name = "created_at", updatable = false)
     private OffsetDateTime createdAt ;
 
     // making bidirectional, we are not using the cascade and removing orphan, because

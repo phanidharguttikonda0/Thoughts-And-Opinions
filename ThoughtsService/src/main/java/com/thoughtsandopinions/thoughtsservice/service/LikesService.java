@@ -17,7 +17,7 @@ import java.util.List;
 public class LikesService {
 
     private final LikesRepository repo;
-    private static final Logger log = LoggerFactory.getLogger(UsersService.class);
+    private static final Logger log = LoggerFactory.getLogger(LikesService.class);
 
     public LikesService(LikesRepository repo) {
         this.repo = repo;
@@ -26,11 +26,13 @@ public class LikesService {
     @Transactional
     public List<UserActivitySummary> getThoughtLikes(long thoughtId, int limit, String cursor) {
 
+        log.info("Fetching likes for thoughtId: {}, limit: {}, cursor: {}", thoughtId, limit, cursor);
         OffsetDateTime time = null ;
-        if(cursor != null || cursor.isEmpty()){
+        if(cursor != null && !cursor.isEmpty()){
             time = CursorUtils.decodeCursor(cursor) ;
         }
         List<UserActivitySummary> likedUsers = repo.findLikedUsers(thoughtId, time, Pageable.ofSize(limit)) ;
+        log.info("Successfully fetched {} likes for thoughtId: {}", likedUsers.size(), thoughtId);
 
         return likedUsers ;
     }

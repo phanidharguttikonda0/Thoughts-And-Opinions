@@ -17,7 +17,7 @@ import java.util.Set;
 @Getter
 @NoArgsConstructor
 @Entity
-@Table(name = "users_cache", schema = "thoughts_db")
+@Table(name = "users_cache")
 public class UsersEntity implements Serializable {
 
     @Id
