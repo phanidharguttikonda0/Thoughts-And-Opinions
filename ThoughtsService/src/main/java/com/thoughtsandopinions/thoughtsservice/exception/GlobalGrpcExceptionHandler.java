@@ -39,6 +39,10 @@ public class GlobalGrpcExceptionHandler implements GrpcExceptionHandler{
             return Status.NOT_FOUND.withDescription("Thought Not Found").asException();
         }
 
+        if(exception instanceof com.thoughtsandopinions.thoughtsservice.exception.DuplicateRepostException) {
+            return Status.ALREADY_EXISTS.withDescription("User has already reposted this thought").asException();
+        }
+
 
         if (exception instanceof org.springframework.dao.DataIntegrityViolationException) {
             return Status.INVALID_ARGUMENT

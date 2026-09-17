@@ -14,6 +14,9 @@ import java.util.List;
 
 public interface ThoughtsRepository extends JpaRepository<ThoughtsEntity, Long> {
 
+    boolean existsByUserIdAndParentThoughtIdAndContentIsNull(long userId, long parentThoughtId);
+
+
     @Query("""
     SELECT new com.thoughtsandopinions.thoughtsservice.model.UserActivitySummary(
         u.id, u.username, u.name, u.profilePicUrl, t.createdAt

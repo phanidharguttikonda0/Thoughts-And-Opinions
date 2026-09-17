@@ -62,6 +62,14 @@ public class UsersService {
         log.info("let's Create a Thought Entity");
         String content = thoughtRequest.hasContent() ? thoughtRequest.getContent() : null;
 
+        if (content == null && parentThought != null) {
+            boolean alreadyReposted = thoughtsRepo.existsByUserIdAndParentThoughtIdAndContentIsNull(user.get().getId(), parentThought.getId());
+            if (alreadyReposted) {
+                log.warn("User {} already reposted thought {}", user.get().getId(), parentThought.getId());
+                throw new com.thoughtsandopinions.thoughtsservice.exception.DuplicateRepostException("Already reposted this thought");
+            }
+        }
+
         ThoughtsEntity thought = new ThoughtsEntity(user.get(), content, parentThought) ;
 
         log.info("let's add thought to users set");
@@ -131,7 +139,7 @@ public class UsersService {
     @Transactional
     public void storeUser(Thoughts.Users user_) {
         log.info("Attempting to store user: {} (userId: {})", user_.getUsername(), user_.getUserId());
-
+        // it actually acting as post and Put request both
         UsersEntity user = new UsersEntity();
         user.setId(user_.getUserId());
         user.setName(user_.getName());
