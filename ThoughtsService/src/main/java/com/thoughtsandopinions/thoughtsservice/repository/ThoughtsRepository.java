@@ -25,7 +25,7 @@ public interface ThoughtsRepository extends JpaRepository<ThoughtsEntity, Long> 
     JOIN t.user u
     WHERE t.parentThought.id = :thoughtId
       AND t.content IS NULL
-      AND (:cursor IS NULL OR t.createdAt < :cursor)
+      AND (cast(:cursor as java.time.OffsetDateTime) IS NULL OR t.createdAt < :cursor)
     ORDER BY t.createdAt DESC
 """)
     List<UserActivitySummary> findRepostedUsers(
