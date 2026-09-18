@@ -83,9 +83,10 @@ public class ThoughtsService {
         UsersEntity user = thought.get().getUser() ;
         log.info("Successfully fetched thought details for thoughtId: {}", thought_id);
         // soon we need to add or incorporate the media urls as well.
+        Long parentThoughtId = thought.get().getParentThought() != null ? thought.get().getParentThought().getId() : null;
         return new ThoughtDetails(
                 thought_id, user.getUsername(), user.getId(), user.getName(), user.getProfilePicUrl(),
-                thought.get().getContent(), thought.get().getParentThought().getId(),
+                thought.get().getContent(), parentThoughtId,
                 thought.get().getLikesCount() , thought.get().getOpinionsCount(),
                 thought.get().getRepostsCount(), thought.get().getCreatedAt()
         ) ;

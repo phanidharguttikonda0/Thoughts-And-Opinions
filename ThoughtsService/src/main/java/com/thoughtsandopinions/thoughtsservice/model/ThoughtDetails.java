@@ -16,7 +16,7 @@ public class ThoughtDetails {
     private final String name ;
     private final String profilePicUrl ;
     private final String content ;
-    private final long parentThoughtId ;
+    private final Long parentThoughtId ;
     private final int likesCount ;
     private final int opinionsCount ;
     private final int repostsCount;
@@ -29,7 +29,7 @@ public class ThoughtDetails {
             String name,
             String profilePicUrl,
             String content,
-            long parentThoughtId,
+            Long parentThoughtId,
             int likesCount,
             int opinionsCount,
             int repostsCount,

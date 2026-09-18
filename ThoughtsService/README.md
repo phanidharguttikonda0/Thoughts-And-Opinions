@@ -106,6 +106,22 @@ Set the following environment variables (or use `application.yaml`) to run the s
 | `DB_USERNAME` | Database user | `postgres` |
 | `DB_PASSWORD` | Database password | `secret` |
 
+## 🧪 Testing Strategy
+
+We maintain a robust suite of unit tests utilizing **JUnit 5** and **Mockito** to validate the core business logic (`service` layer) in complete isolation from the database and gRPC transport layer.
+
+### 1. Test Coverage Scope
+*   **`UsersServiceTests`**: Validates the creation of original thoughts, reposts, and opinions. Asserts the graceful handling of exceptions (e.g., `UserNotFoundException`, `ThoughtNotFoundException`, `DuplicateRepostException`). Confirms that liking and deleting thoughts appropriately cascades and behaves as expected. Ensures local caching of `StoreUser` logic accurately handles partial or empty fields (like missing names).
+*   **`ThoughtsServiceTests`**: Evaluates thought retrievals (checking for missing/null parent IDs), and cursor pagination correctly fetches historical data without duplicates for `GetThoughtOpinions`, `GetThoughtReposts`, and `GetUserThoughtHistory`.
+*   **`LikesServiceTests`**: Confirms that cursor pagination successfully retrieves users who liked a post accurately.
+
+### 2. Edge Cases Verified
+*   **Duplicate Reposts**: Tested that the system correctly identifies and rejects attempts by the same user to repost the exact same thought multiple times using `DuplicateRepostException`.
+*   **Null Checks & Cursors**: Verified stability when dealing with empty strings instead of nulls in Protobuf (`entity.getName().isEmpty()`), as well as correct decoding logic for empty or missing pagination cursors.
+*   **Foreign Key Safety**: Ensured `ThoughtDetails` strictly uses `Long` instead of primitive `long` for `parentThoughtId` to prevent null pointer exceptions when accessing root thoughts directly from the repository.
+
+---
+
 ## 🏃‍♂️ Building and Running
 
 1. **Compile Protobufs & Build the Project:**
