@@ -1,0 +1,15 @@
+spring:
+  application:
+    name: APIGateway
+  jwt:
+    # Replace with a real base64 encoded 256-bit or 512-bit secret key
+    secret: dGhpcy1pcy1hLXNlY3JldC1rZXktZm9yLWp3dC1zaWduaW5nLWFuZC12YWxpZGF0aW9uLXNob3VsZC1iZS1sb25nLWVub3VnaA==
+  data:
+    redis:
+      host: localhost
+      port: 6379
+
+identity:
+  grpc:
+    host: localhost
+    port: 9090
