@@ -221,7 +221,10 @@ public class UserService {
     @Transactional
     public ArrayList<ProfileDetails> getFollowingList(long user_id, int limit, String cursor) {
 
-        OffsetDateTime cursorTime = CursorUtils.decodeCursor(cursor) ;
+        OffsetDateTime cursorTime = OffsetDateTime.MIN ;
+        if (cursor != null) {
+            cursorTime = CursorUtils.decodeCursor(cursor) ;
+        }
 
         ArrayList<ProfileDetails> profileDetails = (ArrayList<ProfileDetails>) userRepo.getFollowingList(
                 cursorTime, user_id, PageRequest.of(0, limit)
