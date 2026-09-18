@@ -120,6 +120,11 @@ We maintain a robust suite of unit tests utilizing **JUnit 5** and **Mockito** t
 *   **Null Checks & Cursors**: Verified stability when dealing with empty strings instead of nulls in Protobuf (`entity.getName().isEmpty()`), as well as correct decoding logic for empty or missing pagination cursors.
 *   **Foreign Key Safety**: Ensured `ThoughtDetails` strictly uses `Long` instead of primitive `long` for `parentThoughtId` to prevent null pointer exceptions when accessing root thoughts directly from the repository.
 
+### 3. Validation Results
+- **Total Test Cases**: 24
+- **Success Rate**: 100% (24/24 passed, 0 failures, 0 errors)
+- **Frameworks**: JUnit 5, Mockito
+
 ---
 
 ## 🏃‍♂️ Building and Running
