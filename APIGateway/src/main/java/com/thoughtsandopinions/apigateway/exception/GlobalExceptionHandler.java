@@ -1,6 +1,6 @@
 package com.thoughtsandopinions.apigateway.exception;
 
-import com.thoughtsandopinions.apigateway.dto.ResponseDTO;
+import com.thoughtsandopinions.apigateway.dto.api.ResponseDTO;
 import io.grpc.StatusRuntimeException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;

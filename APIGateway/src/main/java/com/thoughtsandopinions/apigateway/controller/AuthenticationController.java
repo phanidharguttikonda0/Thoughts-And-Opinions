@@ -1,9 +1,9 @@
 package com.thoughtsandopinions.apigateway.controller;
 
-import com.thoughtsandopinions.apigateway.dto.AuthenticationResponse;
-import com.thoughtsandopinions.apigateway.dto.ResponseDTO;
-import com.thoughtsandopinions.apigateway.dto.SignInDTO;
-import com.thoughtsandopinions.apigateway.dto.SignUpDTO;
+import com.thoughtsandopinions.apigateway.dto.api.AuthenticationResponse;
+import com.thoughtsandopinions.apigateway.dto.api.ResponseDTO;
+import com.thoughtsandopinions.apigateway.dto.api.SignInDTO;
+import com.thoughtsandopinions.apigateway.dto.api.SignUpDTO;
 import com.thoughtsandopinions.apigateway.gRPC.IdentityServiceGrpcHandler;
 import identity.AuthResponse;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -39,6 +39,8 @@ public class AuthenticationController {
                 .message("User signed up successfully")
                 .data(authResponse)
                 .build();
+
+        // need to pass the userId , name, username and profilePic Url to Thoughts Service to store it in users_cache
 
         return ResponseEntity.status(HttpStatus.CREATED).body(responseDTO);
     }

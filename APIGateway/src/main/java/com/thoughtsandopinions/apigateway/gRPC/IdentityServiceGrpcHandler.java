@@ -1,10 +1,9 @@
 package com.thoughtsandopinions.apigateway.gRPC;
 
-import identity.AuthResponse;
-import identity.IdentityGatewayServiceGrpc;
+import com.google.protobuf.Empty;
+import com.thoughtsandopinions.apigateway.dto.service.UpdateProfileServiceDTO;
+import identity.*;
 import identity.IdentityGatewayServiceGrpc.IdentityGatewayServiceBlockingStub;
-import identity.SignUpRequest;
-import identity.LoginRequest ;
 import io.grpc.ManagedChannel;
 import io.grpc.ManagedChannelBuilder;
 import jakarta.annotation.PostConstruct;
@@ -55,6 +54,32 @@ public class IdentityServiceGrpcHandler {
                 .setPassword(password)
                 .build() ;
         return blockingStub.login(request) ;
+    }
+
+    public Empty updateProfile(UpdateProfileServiceDTO dto) {
+
+        UpdateProfileRequest.Builder request = UpdateProfileRequest.newBuilder() ;
+
+        request.setUserId(dto.userId()) ;
+
+        if (dto.username() != null) {
+            request.setUsername(dto.username()) ;
+        }
+
+        if(dto.name() != null) {
+            request.setName(dto.name()) ;
+        }
+
+        if(dto.bio() != null) {
+            request.setBio(dto.bio()) ;
+        }
+
+        if(dto.profilePicUrl() != null) {
+            request.setAvatarUrl(dto.profilePicUrl()) ;
+        }
+
+        return blockingStub.updateProfile(request.build());
+
     }
 
 }

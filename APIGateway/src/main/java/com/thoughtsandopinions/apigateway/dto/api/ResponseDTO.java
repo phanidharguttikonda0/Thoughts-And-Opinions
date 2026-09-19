@@ -1,4 +1,4 @@
-package com.thoughtsandopinions.apigateway.dto;
+package com.thoughtsandopinions.apigateway.dto.api;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -9,6 +9,8 @@ import lombok.NoArgsConstructor;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class AuthenticationResponse {
-    private String token;
+public class ResponseDTO<T> {
+    private boolean success;
+    private String message;
+    private T data;
 }
