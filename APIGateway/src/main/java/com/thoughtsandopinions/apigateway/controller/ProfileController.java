@@ -3,8 +3,12 @@ package com.thoughtsandopinions.apigateway.controller;
 import com.thoughtsandopinions.apigateway.dto.api.ResponseDTO;
 import com.thoughtsandopinions.apigateway.dto.api.UpdateProfileDTO;
 import com.thoughtsandopinions.apigateway.dto.service.UpdateProfileServiceDTO;
+import com.thoughtsandopinions.apigateway.dto.service.UserCache;
 import com.thoughtsandopinions.apigateway.gRPC.IdentityServiceGrpcHandler;
+import com.thoughtsandopinions.apigateway.gRPC.ThoughtsServiceGrpcHandler;
 import com.thoughtsandopinions.apigateway.service.MinioService;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.codec.multipart.FilePart;
@@ -17,11 +21,14 @@ import reactor.core.scheduler.Schedulers;
 public class ProfileController {
 
     private final IdentityServiceGrpcHandler identityServiceGrpcHandler;
+    private final ThoughtsServiceGrpcHandler thoughtsServiceGrpcHandler ;
     private final MinioService minioService;
+    private static final Logger log = LoggerFactory.getLogger(ProfileController.class);
 
-    public ProfileController(IdentityServiceGrpcHandler identityServiceGrpcHandler, MinioService minioService) {
+    public ProfileController(IdentityServiceGrpcHandler identityServiceGrpcHandler, MinioService minioService, ThoughtsServiceGrpcHandler thoughtsServiceGrpcHandler) {
         this.identityServiceGrpcHandler = identityServiceGrpcHandler;
         this.minioService = minioService;
+        this.thoughtsServiceGrpcHandler = thoughtsServiceGrpcHandler ;
     }
 
     /*
@@ -79,9 +86,7 @@ public class ProfileController {
                 ? minioService.uploadProfilePicture(filePart) 
                 : Mono.just("");
 
-        /*
-        * Here we are
-        * */
+
         return imageUrlMono.flatMap(imageUrl -> {
             String profileUrl = imageUrl.isEmpty() ? null : imageUrl;
 
@@ -93,10 +98,31 @@ public class ProfileController {
                     profileUrl
             );
 
+
             // Offload blocking gRPC call to boundedElastic thread pool
             return Mono.fromCallable(() -> identityServiceGrpcHandler.updateProfile(serviceDTO))
                     .subscribeOn(Schedulers.boundedElastic())
                     .map(grpcResponse -> {
+                        // here also we need to do an users cache storeUser in thoughts table.
+                        UserCache user = new UserCache(userId, serviceDTO.username(), serviceDTO.name(), serviceDTO.profilePicUrl()) ;
+
+                        // this update runs in background. as our motto was to follow eventual consistency
+                        Mono.fromCallable( () -> thoughtsServiceGrpcHandler.userCache(user))
+                                .subscribeOn(Schedulers.boundedElastic())
+                                .subscribe(
+                                        empty -> {
+                                            log.info("successfully updated in the thoughts sevice database as well");
+                                        },
+                                        error -> {
+                                            log.error("An Error Occurred while Updating the Thoughts table DB -> "+ error
+                                            );
+
+                                            // need to write a fallback for this mechanism currently having no idea on
+                                            // how to build a fallback for it. Currently thinking adding it to kafka
+                                            // and from the kafka reading as consumer and executing it .
+                                        }
+                                );
+
                         ResponseDTO<Void> response = ResponseDTO.<Void>builder()
                                 .success(true)
                                 .message("Profile updated successfully")
@@ -105,6 +131,11 @@ public class ProfileController {
                     });
         });
     }
+
+
+
+
+
 }
 
 /*

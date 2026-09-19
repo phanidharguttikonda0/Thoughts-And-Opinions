@@ -1,11 +1,15 @@
 package com.thoughtsandopinions.apigateway.controller;
 
+import com.google.protobuf.Empty;
 import com.thoughtsandopinions.apigateway.dto.api.AuthenticationResponse;
 import com.thoughtsandopinions.apigateway.dto.api.ResponseDTO;
 import com.thoughtsandopinions.apigateway.dto.api.SignInDTO;
 import com.thoughtsandopinions.apigateway.dto.api.SignUpDTO;
+import com.thoughtsandopinions.apigateway.dto.service.UserCache;
 import com.thoughtsandopinions.apigateway.gRPC.IdentityServiceGrpcHandler;
-import org.springframework.beans.factory.annotation.Autowired;
+import com.thoughtsandopinions.apigateway.gRPC.ThoughtsServiceGrpcHandler;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -17,10 +21,13 @@ import reactor.core.scheduler.Schedulers;
 public class AuthenticationController {
 
     private final IdentityServiceGrpcHandler identityServiceGrpcHandler;
+    private final ThoughtsServiceGrpcHandler thoughtsServiceGrpcHandler ;
+    private static final Logger log = LoggerFactory.getLogger(AuthenticationController.class);
 
-    @Autowired
-    public AuthenticationController(IdentityServiceGrpcHandler identityServiceGrpcHandler) {
+
+    public AuthenticationController(IdentityServiceGrpcHandler identityServiceGrpcHandler, ThoughtsServiceGrpcHandler thoughtsServiceGrpcHandler) {
         this.identityServiceGrpcHandler = identityServiceGrpcHandler;
+        this.thoughtsServiceGrpcHandler = thoughtsServiceGrpcHandler ;
     }
 
     @PostMapping("/signup")
@@ -33,6 +40,26 @@ public class AuthenticationController {
         ))
         .subscribeOn(Schedulers.boundedElastic())
         .map(gRPCResponse -> {
+
+            UserCache user = new UserCache(gRPCResponse.getUserId(), request.username(), null, null) ;
+
+            // adding the user details into thoughts table user_cache in background. Even if it fails
+            // that doesn't affect , because our user data will be hold in identity service only primarily.
+
+            Mono.fromCallable(() -> thoughtsServiceGrpcHandler.userCache(user))
+                    .subscribeOn(Schedulers.boundedElastic())
+                    .subscribe(
+                            empty -> {
+                                log.info("Successfully added user in user cache via thoughts service");
+                            },
+                            error -> {
+                                log.error("adding user into user cache into thoughts service failed");
+                                // need to write a fallback for it.
+                            }
+                    ) ;
+
+
+
             AuthenticationResponse authResponse = AuthenticationResponse.builder()
                     .token(gRPCResponse.getJwtToken())
                     .build();

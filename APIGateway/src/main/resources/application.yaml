@@ -13,6 +13,12 @@ identity:
   grpc:
     host: localhost
     port: 9090
+
+thoughts:
+  grpc:
+    host: localhost
+    port: 9091
+
 minio:
   endpoint: http://localhost:9000
   access-key: minioadmin
