@@ -33,3 +33,14 @@ To run the entire ecosystem locally with their attached databases:
    ```bash
    git clone <repository-url>
    cd <repository-name>
+   ```
+
+## 🛡️ Exception Handling Workflow (gRPC to HTTP)
+
+In this architecture, custom business exceptions thrown by backend microservices (e.g., `IdentityService`, `ThoughtsService`) must be translated into standard HTTP responses at the API Gateway. 
+
+### How It Works:
+1. **Service-Level Handling:** Each microservice implements a `GlobalGrpcExceptionHandler` (which implements `org.springframework.grpc.server.exception.GrpcExceptionHandler`).
+2. **Translation to gRPC Status:** When a custom exception (like `UserNotFoundException` or `AlreadyFollowingException`) is thrown, this handler catches it *before* it leaves the microservice. It maps the custom exception to a standard gRPC `Status` (e.g., `Status.NOT_FOUND` or `Status.ALREADY_EXISTS`) and returns it as a `StatusException`.
+3. **Gateway Handling:** The API Gateway receives a `StatusRuntimeException`. The `@RestControllerAdvice` (`GlobalExceptionHandler`) in the Gateway catches this exception, inspects the gRPC status code, and translates it into the appropriate HTTP status code (e.g., 404 Not Found, 409 Conflict, 400 Bad Request).
+4. **Final Response:** The user receives a clean, standardized JSON `ResponseDTO` containing the success flag, the error message, and the correct HTTP status code.

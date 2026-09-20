@@ -27,6 +27,7 @@ public class GlobalExceptionHandler {
                 httpStatus = HttpStatus.FORBIDDEN;
                 break;
             case INVALID_ARGUMENT:
+            case FAILED_PRECONDITION:
                 httpStatus = HttpStatus.BAD_REQUEST;
                 break;
             default:
