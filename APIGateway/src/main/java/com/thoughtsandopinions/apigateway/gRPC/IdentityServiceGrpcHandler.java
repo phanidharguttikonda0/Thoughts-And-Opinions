@@ -82,4 +82,57 @@ public class IdentityServiceGrpcHandler {
 
     }
 
+
+    public Empty followUser(Long userId, Long targetUserId) {
+        FollowRequest request = FollowRequest.newBuilder()
+                .setUserId(userId)
+                .setTargetUserId(targetUserId)
+                .build() ;
+
+        return blockingStub.followUser(request) ;
+    }
+
+    public Empty unFollowUser(Long userId, Long targetUserId) {
+        FollowRequest request = FollowRequest.newBuilder()
+                .setUserId(userId)
+                .setTargetUserId(targetUserId)
+                .build() ;
+
+        return blockingStub.unfollowUser(request) ;
+    }
+
+    public UsersListResponse getFollowers(Long userId, int limit, String cursor) {
+
+        UsersListRequest request = UsersListRequest.newBuilder()
+                .setUserId(userId)
+                .setCursor(cursor)
+                .setLimit(limit).build() ;
+        return blockingStub.getFollowersList(request) ;
+    }
+
+    public UsersListResponse getFollowing(Long userId, int limit, String cursor) {
+
+        UsersListRequest request = UsersListRequest.newBuilder()
+                .setUserId(userId)
+                .setCursor(cursor)
+                .setLimit(limit).build() ;
+        return blockingStub.getFollowingList(request) ;
+    }
+
+    public ProfileData getProfile(Long userId) {
+
+        GetUserRequest request = GetUserRequest.newBuilder().setUserId(userId).build() ;
+        return blockingStub.getUserProfile(request) ;
+    }
+
+
+    public SearchResponse getSearch(String usernamePrefix) {
+
+        SearchRequest request = SearchRequest.newBuilder().
+        setQuery(usernamePrefix)
+        .build() ;
+
+        return blockingStub.searchUsers(request) ; // returns top 5 matched users
+    }
+
 }

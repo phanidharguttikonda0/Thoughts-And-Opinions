@@ -58,4 +58,14 @@ public class ThoughtsServiceGrpcHandler {
         return blockingStub.storeUser(userBuilder.build()) ;
     }
 
+    public Thoughts.GetHistoryResponse getUserProfileFeed(Long userId, int limit, String cursor) {
+
+        Thoughts.GetUserHistoryRequest request = Thoughts.GetUserHistoryRequest.newBuilder()
+                .setCursor(cursor)
+                .setUserId(userId)
+                .setLimit(limit).build() ;
+
+        return blockingStub.getUserHistory(request) ;
+    }
+
 }

@@ -2,11 +2,14 @@ package com.thoughtsandopinions.apigateway.controller;
 
 import com.thoughtsandopinions.apigateway.dto.api.ResponseDTO;
 import com.thoughtsandopinions.apigateway.dto.api.UpdateProfileDTO;
+import com.thoughtsandopinions.apigateway.dto.api.userProfileFeed;
 import com.thoughtsandopinions.apigateway.dto.service.UpdateProfileServiceDTO;
 import com.thoughtsandopinions.apigateway.dto.service.UserCache;
 import com.thoughtsandopinions.apigateway.gRPC.IdentityServiceGrpcHandler;
 import com.thoughtsandopinions.apigateway.gRPC.ThoughtsServiceGrpcHandler;
 import com.thoughtsandopinions.apigateway.service.MinioService;
+import identity.ProfileData;
+import identity.SearchResponse;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.MediaType;
@@ -133,7 +136,55 @@ public class ProfileController {
     }
 
 
+    @GetMapping("/{id}")
+    public Mono<ResponseEntity<ResponseDTO<ProfileData>>> getProfile(@PathVariable("id") Long userId) {
 
+        return Mono.fromCallable(() -> identityServiceGrpcHandler.getProfile(userId))
+                .subscribeOn(Schedulers.boundedElastic())
+                .map(gRPCResponse ->
+
+                    ResponseEntity.ok(ResponseDTO.<ProfileData>builder().success(true)
+                            .message("successfully fetched profile data")
+                            .data(gRPCResponse).build()
+                    )
+
+                ) ;
+    }
+
+    // to get profile feed ( like when we open the profile , we will see the posts right , that posts feed)
+    @GetMapping("/{id}/feed")
+    public Mono<ResponseEntity<ResponseDTO<userProfileFeed>>> getProfileFeed(@PathVariable("id") Long userId,
+                                                                             @RequestParam(value = "limit", defaultValue = "10") Integer limit,
+                                                                             @RequestParam(value = "cursor", required = false) String cursor) {
+
+        return Mono.fromCallable(() -> thoughtsServiceGrpcHandler.getUserProfileFeed(userId, limit, cursor))
+                .subscribeOn(Schedulers.boundedElastic())
+                .map(gRPCResponse -> {
+                    userProfileFeed feed = new userProfileFeed(gRPCResponse.getThoughtsListList(), gRPCResponse.getNextCursor()) ;
+
+                    return ResponseEntity.ok(ResponseDTO.<userProfileFeed>builder().success(true).message("successfully got profile feed")
+                            .data(feed).build()) ;
+                }) ;
+    }
+
+    // The both getProfile and getProfileFeed Url's works together to fetch the profile.
+
+
+
+
+
+    @GetMapping("/search/{usernamePrefix}")
+    public Mono<ResponseEntity<ResponseDTO<SearchResponse>>> getSearch(@PathVariable("usernamePrefix") String usernamePrefix) {
+
+        return Mono.fromCallable(() -> identityServiceGrpcHandler.getSearch(usernamePrefix))
+                .subscribeOn(Schedulers.boundedElastic())
+                .map(gRPCResponse -> ResponseEntity.ok(
+                        ResponseDTO.<SearchResponse>builder()
+                                .success(true)
+                                .message("here are searched users")
+                                .data(gRPCResponse).build()
+                )) ;
+    }
 
 
 }
