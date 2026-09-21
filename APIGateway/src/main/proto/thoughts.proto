@@ -15,12 +15,12 @@ service ThoughtGatewayService {
   rpc getThoughtLikes (GetLikesRequest) returns (GetLikesResponse);
 
   // GET /thoughts/{parent_thought_id}/opinions?cursor=
-  rpc getOpinions (GetOpinionsRequest) returns (GetOpinionsResponse);
+  rpc getOpinions (GetOpinionsRequest) returns (GetOpinionsResponse); // pending
 
   // GET /users/{username}/feed?cursor=
   rpc getUserHistory (GetUserHistoryRequest) returns (GetHistoryResponse);
 
-  rpc getThought(GetThoughtRequest) returns (GetThoughtResponse) ;
+  rpc getThought(GetThoughtRequest) returns (GetThoughtResponse) ; // pending
 
   rpc getReposts(GetRepostsRequest) returns (GetRepostsResponse) ;
 }

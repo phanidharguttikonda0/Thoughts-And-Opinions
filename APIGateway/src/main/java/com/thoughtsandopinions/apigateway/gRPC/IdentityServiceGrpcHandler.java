@@ -103,20 +103,21 @@ public class IdentityServiceGrpcHandler {
 
     public UsersListResponse getFollowers(Long userId, int limit, String cursor) {
 
-        UsersListRequest request = UsersListRequest.newBuilder()
+        UsersListRequest.Builder request = UsersListRequest.newBuilder()
                 .setUserId(userId)
-                .setCursor(cursor)
-                .setLimit(limit).build() ;
-        return blockingStub.getFollowersList(request) ;
+                .setLimit(limit);
+        if (cursor != null) { request.setCursor(cursor); }
+        return blockingStub.getFollowersList(request.build()) ;
     }
 
     public UsersListResponse getFollowing(Long userId, int limit, String cursor) {
 
-        UsersListRequest request = UsersListRequest.newBuilder()
+        UsersListRequest.Builder request = UsersListRequest.newBuilder()
                 .setUserId(userId)
-                .setCursor(cursor)
-                .setLimit(limit).build() ;
-        return blockingStub.getFollowingList(request) ;
+                .setLimit(limit) ;
+
+        if (cursor != null) { request.setCursor(cursor); }
+        return blockingStub.getFollowingList(request.build()) ;
     }
 
     public ProfileData getProfile(Long userId) {

@@ -1,8 +1,7 @@
 package com.thoughtsandopinions.apigateway.controller;
 
-import com.thoughtsandopinions.apigateway.dto.api.ResponseDTO;
-import com.thoughtsandopinions.apigateway.dto.api.UpdateProfileDTO;
-import com.thoughtsandopinions.apigateway.dto.api.userProfileFeed;
+import com.thoughtsandopinions.apigateway.dto.api.*;
+import com.thoughtsandopinions.apigateway.utils.DtoMapper;
 import com.thoughtsandopinions.apigateway.dto.service.UpdateProfileServiceDTO;
 import com.thoughtsandopinions.apigateway.dto.service.UserCache;
 import com.thoughtsandopinions.apigateway.gRPC.IdentityServiceGrpcHandler;
@@ -137,32 +136,34 @@ public class ProfileController {
 
 
     @GetMapping("/{id}")
-    public Mono<ResponseEntity<ResponseDTO<ProfileData>>> getProfile(@PathVariable("id") Long userId) {
+    public Mono<ResponseEntity<ResponseDTO<ProfileDTO>>> getProfile(@PathVariable("id") Long userId) {
 
         return Mono.fromCallable(() -> identityServiceGrpcHandler.getProfile(userId))
                 .subscribeOn(Schedulers.boundedElastic())
-                .map(gRPCResponse ->
-
-                    ResponseEntity.ok(ResponseDTO.<ProfileData>builder().success(true)
+                .map(gRPCResponse -> {
+                    ProfileDTO profile = DtoMapper.map(gRPCResponse);
+                    return ResponseEntity.ok(ResponseDTO.<ProfileDTO>builder().success(true)
                             .message("successfully fetched profile data")
-                            .data(gRPCResponse).build()
-                    )
-
-                ) ;
+                            .data(profile).build()
+                    );
+                }) ;
     }
 
     // to get profile feed ( like when we open the profile , we will see the posts right , that posts feed)
     @GetMapping("/{id}/feed")
-    public Mono<ResponseEntity<ResponseDTO<userProfileFeed>>> getProfileFeed(@PathVariable("id") Long userId,
+    public Mono<ResponseEntity<ResponseDTO<ThoughtsFeedDTO>>> getProfileFeed(@PathVariable("id") Long userId,
                                                                              @RequestParam(value = "limit", defaultValue = "10") Integer limit,
                                                                              @RequestParam(value = "cursor", required = false) String cursor) {
 
         return Mono.fromCallable(() -> thoughtsServiceGrpcHandler.getUserProfileFeed(userId, limit, cursor))
                 .subscribeOn(Schedulers.boundedElastic())
                 .map(gRPCResponse -> {
-                    userProfileFeed feed = new userProfileFeed(gRPCResponse.getThoughtsListList(), gRPCResponse.getNextCursor()) ;
+                    java.util.List<ThoughtDetailsDTO> thoughtsList = gRPCResponse.getThoughtsListList().stream()
+                            .map(DtoMapper::map)
+                            .toList();
+                    ThoughtsFeedDTO feed = new ThoughtsFeedDTO(thoughtsList, gRPCResponse.getNextCursor());
 
-                    return ResponseEntity.ok(ResponseDTO.<userProfileFeed>builder().success(true).message("successfully got profile feed")
+                    return ResponseEntity.ok(ResponseDTO.<ThoughtsFeedDTO>builder().success(true).message("successfully got profile feed")
                             .data(feed).build()) ;
                 }) ;
     }
@@ -174,16 +175,22 @@ public class ProfileController {
 
 
     @GetMapping("/search/{usernamePrefix}")
-    public Mono<ResponseEntity<ResponseDTO<SearchResponse>>> getSearch(@PathVariable("usernamePrefix") String usernamePrefix) {
+    public Mono<ResponseEntity<ResponseDTO<UsersFeedDTO>>> getSearch(@PathVariable("usernamePrefix") String usernamePrefix) {
 
         return Mono.fromCallable(() -> identityServiceGrpcHandler.getSearch(usernamePrefix))
                 .subscribeOn(Schedulers.boundedElastic())
-                .map(gRPCResponse -> ResponseEntity.ok(
-                        ResponseDTO.<SearchResponse>builder()
-                                .success(true)
-                                .message("here are searched users")
-                                .data(gRPCResponse).build()
-                )) ;
+                .map(gRPCResponse -> {
+                    java.util.List<UserDTO> users = gRPCResponse.getUsersList().stream()
+                            .map(DtoMapper::map)
+                            .toList();
+                    UsersFeedDTO feed = new UsersFeedDTO(users, null);
+                    return ResponseEntity.ok(
+                            ResponseDTO.<UsersFeedDTO>builder()
+                                    .success(true)
+                                    .message("here are searched users")
+                                    .data(feed).build()
+                    );
+                });
     }
 
 

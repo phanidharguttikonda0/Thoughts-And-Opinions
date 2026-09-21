@@ -1,6 +1,8 @@
 package com.thoughtsandopinions.apigateway.controller;
 
-import com.thoughtsandopinions.apigateway.dto.api.FollowResponse;
+import com.thoughtsandopinions.apigateway.dto.api.UsersFeedDTO;
+import com.thoughtsandopinions.apigateway.dto.api.UserDTO;
+import com.thoughtsandopinions.apigateway.utils.DtoMapper;
 import com.thoughtsandopinions.apigateway.dto.api.ResponseDTO;
 import com.thoughtsandopinions.apigateway.gRPC.IdentityServiceGrpcHandler;
 import org.springframework.http.ResponseEntity;
@@ -52,17 +54,19 @@ public class FollowController {
     }
 
     @GetMapping("/{id}/followerslist")
-    public Mono<ResponseEntity<ResponseDTO<FollowResponse>>> getFollowers(@PathVariable("id") Long userId,
-                                                                          @RequestParam(value = "limit", defaultValue = "20") Integer limit,
-                                                                          @RequestParam(value = "cursor", required = false) String cursor) {
+    public Mono<ResponseEntity<ResponseDTO<UsersFeedDTO>>> getFollowers(@PathVariable("id") Long userId,
+                                                                        @RequestParam(value = "limit", defaultValue = "20") Integer limit,
+                                                                        @RequestParam(value = "cursor", required = false) String cursor) {
 
         return Mono.fromCallable(() -> identityServiceGrpcHandler.getFollowers(userId, limit, cursor))
                 .subscribeOn(Schedulers.boundedElastic())
                 .map(gRpcResponse -> {
+                    java.util.List<UserDTO> users = gRpcResponse.getUsersList().stream()
+                            .map(DtoMapper::map)
+                            .toList();
+                    UsersFeedDTO responseData = new UsersFeedDTO(users, gRpcResponse.getNextCursor()) ;
 
-                    FollowResponse responseData = new FollowResponse(gRpcResponse.getUsersList(), gRpcResponse.getNextCursor()) ;
-
-                    ResponseDTO<FollowResponse> response = ResponseDTO.<FollowResponse>builder()
+                    ResponseDTO<UsersFeedDTO> response = ResponseDTO.<UsersFeedDTO>builder()
                             .data(responseData)
                             .message("here are followers")
                             .success(true).build() ;
@@ -73,16 +77,18 @@ public class FollowController {
     }
 
     @GetMapping("/{id}/followinglist")
-    public Mono<ResponseEntity<ResponseDTO<FollowResponse>>> getFollowings(@PathVariable("id") Long userId,
-                                                                           @RequestParam(value = "limit", defaultValue = "20") Integer limit,
-                                                                           @RequestParam(value = "cursor", required = false) String cursor) {
+    public Mono<ResponseEntity<ResponseDTO<UsersFeedDTO>>> getFollowings(@PathVariable("id") Long userId,
+                                                                         @RequestParam(value = "limit", defaultValue = "20") Integer limit,
+                                                                         @RequestParam(value = "cursor", required = false) String cursor) {
         return Mono.fromCallable(() -> identityServiceGrpcHandler.getFollowing(userId, limit, cursor))
                 .subscribeOn(Schedulers.boundedElastic())
                 .map(gRpcResponse -> {
+                    java.util.List<UserDTO> users = gRpcResponse.getUsersList().stream()
+                            .map(DtoMapper::map)
+                            .toList();
+                    UsersFeedDTO responseData = new UsersFeedDTO(users, gRpcResponse.getNextCursor()) ;
 
-                    FollowResponse responseData = new FollowResponse(gRpcResponse.getUsersList(), gRpcResponse.getNextCursor()) ;
-
-                    ResponseDTO<FollowResponse> response = ResponseDTO.<FollowResponse>builder()
+                    ResponseDTO<UsersFeedDTO> response = ResponseDTO.<UsersFeedDTO>builder()
                             .data(responseData)
                             .message("here are followings")
                             .success(true).build() ;

@@ -1,11 +1,8 @@
 package com.thoughtsandopinions.apigateway.dto.api;
 
-import identity.UserDetails;
 import java.util.List;
 
-
-public record FollowResponse (
-        List<UserDetails> users,
+public record ThoughtsFeedDTO(
+        List<ThoughtDetailsDTO> thoughts,
         String nextCursor
-){
-}
+) {}
