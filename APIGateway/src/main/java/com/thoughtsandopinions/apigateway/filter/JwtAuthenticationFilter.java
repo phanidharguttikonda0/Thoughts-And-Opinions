@@ -27,7 +27,7 @@ public class JwtAuthenticationFilter implements WebFilter {
     private final SecretKey secretKey;
 
     // Loading the secrets from the application.yaml configuration file
-    public JwtAuthenticationFilter(@Value("${jwt.secret}") String secret) {
+    public JwtAuthenticationFilter(@Value("${spring.jwt.secret}") String secret) {
         byte[] decodedKey = Base64.getDecoder().decode(secret.getBytes(StandardCharsets.UTF_8));
         this.secretKey = Keys.hmacShaKeyFor(decodedKey);
     }
@@ -38,7 +38,7 @@ public class JwtAuthenticationFilter implements WebFilter {
 
         // 1. Skipping validation entirely for the following POST auth routes
         // These will move down the chain to be intercepted safely by the Rate Limiter
-        if (path.equals("/auth/login") || path.equals("/auth/signup") || path.equals("/auth/forgot-password")) {
+        if (path.equals("/auth/signin") || path.equals("/auth/signup") || path.equals("/auth/forgot-password")) {
             return chain.filter(exchange);
         }
 

@@ -16,7 +16,7 @@ Some endpoints (like profile updates) will also automatically receive the `X-Use
 - **Request Body:**
   ```json
   {
-    "name": "John Doe",
+    "email": "johndoe@example.com",
     "username": "johndoe",
     "password": "SecurePassword123"
   }

@@ -11,7 +11,7 @@ POST {{host}}/auth/signup
 Content-Type: application/json
 
 {
-  "name": "Test User 1",
+  "email": "testuser1@example.com",
   "username": "{{username}}",
   "password": "{{password}}"
 }
@@ -78,7 +78,35 @@ Content-Type: application/json
 GET {{host}}/thoughts/opinions/{{thoughtId}}?limit=5
 Authorization: Bearer {{token1}}
 
-### 11. Update Profile (Multipart - requires proper IDE file setup, skipping raw text test here but format shown)
+### 11. Get Profile Feed
+GET {{host}}/profile/1/feed?limit=10
+Authorization: Bearer {{token1}}
+
+### 12. Follow a User (e.g. User 2, if they existed)
+GET {{host}}/user/2/follow
+Authorization: Bearer {{token1}}
+
+### 13. Unfollow a User
+DELETE {{host}}/user/2/follow
+Authorization: Bearer {{token1}}
+
+### 14. Get Followers List
+GET {{host}}/user/1/followerslist?limit=10
+Authorization: Bearer {{token1}}
+
+### 15. Get Following List
+GET {{host}}/user/1/followinglist?limit=10
+Authorization: Bearer {{token1}}
+
+### 16. Get Reposts of the Thought
+GET {{host}}/thoughts/reposts/{{thoughtId}}?limit=10
+Authorization: Bearer {{token1}}
+
+### 17. Delete the Thought
+DELETE {{host}}/thoughts/{{thoughtId}}
+Authorization: Bearer {{token1}}
+
+### 18. Update Profile (Multipart - requires proper IDE file setup)
 # PATCH {{host}}/profile/
 # Authorization: Bearer {{token1}}
 # Content-Type: multipart/form-data; boundary=boundary

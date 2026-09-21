@@ -24,6 +24,10 @@ spring:
     server:
       port: 9090
 
+  jwt:
+    # Use the EXACT same Base64 encoded secret as the APIGateway!
+    secret: dGhpcy1pcy1hLXNlY3JldC1rZXktZm9yLWp3dC1zaWduaW5nLWFuZC12YWxpZGF0aW9uLXNob3VsZC1iZS1sb25nLWVub3VnaA==
+
 # 4. SNOWFLAKE DISTRIBUTED CONFIGURATION
 # This maps the environment variable when running on Kubernetes/Docker,
 # and defaults to '1' when running locally on your laptop.

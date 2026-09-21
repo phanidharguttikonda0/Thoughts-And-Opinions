@@ -16,9 +16,7 @@ public class SecurityConfig {
         return http
                 .csrf(ServerHttpSecurity.CsrfSpec::disable)
                 .authorizeExchange(exchanges -> exchanges
-                        // allowing these methods with out hitting any authentication filter
-                        .pathMatchers(HttpMethod.POST, "/auth/login", "/auth/signup", "/auth/forgot-password").permitAll()
-                        .anyExchange().authenticated()
+                        .anyExchange().permitAll()
                 )
                 .build();
     }
