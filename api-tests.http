@@ -86,8 +86,12 @@ Authorization: Bearer {{token1}}
 GET {{host}}/user/2/follow
 Authorization: Bearer {{token1}}
 
-### 13. Unfollow a User
-DELETE {{host}}/user/2/follow
+### 13. Unfollow User 2
+DELETE {{host}}/user/{{user2Id}}/follow
+Authorization: Bearer {{token1}}
+
+### Check if User 1 is following User 2
+GET {{host}}/user/{{user2Id}}/is-following
 Authorization: Bearer {{token1}}
 
 ### 14. Get Followers List

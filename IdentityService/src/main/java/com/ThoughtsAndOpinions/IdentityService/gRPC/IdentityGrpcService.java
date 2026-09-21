@@ -206,4 +206,14 @@ public class IdentityGrpcService extends IdentityGatewayServiceGrpc.IdentityGate
         responseObserver.onNext(response);
         responseObserver.onCompleted();
     }
+
+    @Override
+    public void isFollowing(FollowRequest request, StreamObserver<IsFollowingResponse> responseObserver) {
+        boolean isFollowing = service.isFollowing(request.getUserId(), request.getTargetUserId());
+        IsFollowingResponse resp = IsFollowingResponse.newBuilder()
+                .setIsFollowing(isFollowing)
+                .build();
+        responseObserver.onNext(resp);
+        responseObserver.onCompleted();
+    }
 }

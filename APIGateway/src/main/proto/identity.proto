@@ -16,6 +16,7 @@ service IdentityGatewayService {
   rpc searchUsers (SearchRequest) returns (SearchResponse);   // GET /search/users?q=
   rpc getFollowersList (UsersListRequest) returns (UsersListResponse) ;
   rpc getFollowingList (UsersListRequest) returns (UsersListResponse) ;
+  rpc isFollowing (FollowRequest) returns (IsFollowingResponse);
 }
 
 message UsersListRequest {
@@ -98,4 +99,8 @@ message UserDetails {
 
 message SearchResponse {
   repeated UserDetails users = 1;  // 'repeated' acts as a List/Array in Java
+}
+
+message IsFollowingResponse {
+  bool is_following = 1;
 }

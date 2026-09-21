@@ -136,4 +136,12 @@ public class IdentityServiceGrpcHandler {
         return blockingStub.searchUsers(request) ; // returns top 5 matched users
     }
 
+    public boolean isFollowing(Long userId, Long targetUserId) {
+        FollowRequest request = FollowRequest.newBuilder()
+                .setUserId(userId)
+                .setTargetUserId(targetUserId)
+                .build();
+        return blockingStub.isFollowing(request).getIsFollowing();
+    }
+
 }

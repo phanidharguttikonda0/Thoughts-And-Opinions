@@ -99,5 +99,21 @@ public class FollowController {
     }
 
 
+    @GetMapping("/{id}/is-following")
+    public Mono<ResponseEntity<ResponseDTO<Boolean>>> isFollowing(@RequestHeader("X-User-Id") Long userId, @PathVariable("id") Long targetUserId) {
+
+        return Mono.fromCallable(() -> identityServiceGrpcHandler.isFollowing(userId, targetUserId))
+                .subscribeOn(Schedulers.boundedElastic())
+                .map(isFollowing -> {
+
+                    ResponseDTO<Boolean> response = ResponseDTO.<Boolean>builder()
+                            .data(isFollowing)
+                            .success(true)
+                            .message("successfully checked following status").build() ;
+
+                    return ResponseEntity.status(200).body(response) ;
+
+                }) ;
+    }
 
 }

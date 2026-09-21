@@ -113,6 +113,18 @@ public class UserService {
 
 
     @Transactional
+    public boolean isFollowing(long userId, long targetUserId) {
+        Optional<UserEntity> user = userRepo.findById(userId);
+        if (user.isPresent()) {
+            return user.get().getFollowing().stream().anyMatch(
+                    f -> f.getFollowing().getId() == targetUserId
+            );
+        } else {
+            throw new UserNotFoundException("user_id : " + userId + " not found");
+        }
+    }
+
+    @Transactional
     public void followUser(long userId, long followingId) {
         Optional<UserEntity> user = userRepo.findById(userId) ;
 
