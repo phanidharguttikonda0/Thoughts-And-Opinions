@@ -1,0 +1,21 @@
+syntax = "proto3";
+package timeline;
+
+import "thoughts.proto"; // We import thoughts.proto so we can reuse the GetThoughtResponse message
+
+service TimelineGatewayService {
+  // GET /feed (Called by API Gateway)
+  rpc getFeed (GetFeedRequest) returns (GetFeedResponse);
+}
+
+message GetFeedRequest {
+  int64 user_id = 1;
+  int32 limit = 2;
+  optional string cursor = 3;
+}
+
+message GetFeedResponse {
+  // We return a list of full thoughts using the message from thoughts.proto
+  repeated thoughts.GetThoughtResponse thoughts_list = 1;
+  string next_cursor = 2;
+}
