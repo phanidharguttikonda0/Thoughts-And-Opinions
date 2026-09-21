@@ -71,67 +71,69 @@ public class ProfileController {
 
         /*
          * PROFILE UPDATE EXECUTION FLOW:
-         * First, the WebFlux Event Loop receives the incoming multipart file chunks and passes
-         * them non-blockingly to the uploadProfilePicture function, which streams the chunks
-         * to a temporary file on the local disk. Once the file is complete, the Event Loop
-         * offloads the heavy lifting to a `Schedulers.boundedElastic()` worker thread (a separate,
-         * disposable OS-level platform thread from a dedicated pool). This worker thread uses
-         * the old, blocking MinIO SDK to upload the file. While this worker thread goes to sleep
-         * waiting for MinIO, the main WebFlux Event Loop remains completely unblocked and free
-         * to serve other users. Once the upload succeeds, the worker thread wakes up and returns
-         * the public URL. We then use this URL to build our Service DTO. Finally, the Event Loop
-         * offloads the blocking gRPC call to another boundedElastic worker thread, ensuring the
-         * Identity Service is updated without ever freezing our core WebFlux threads.
+         * 1. Fetch current profile from Identity Service to get the old profile picture URL.
+         * 2. Receive the multipart file chunks non-blockingly and stream to a temp file.
+         * 3. Offload blocking MinIO SDK call to upload the new image.
+         * 4. Call the Identity Service via gRPC to update the user profile with the new URL.
+         * 5. If successful: Fire-and-forget a MinIO delete call to clean up the OLD image.
+         * 6. If failed: Fire-and-forget a MinIO delete call to clean up the newly uploaded NEW image.
          */
 
-        Mono<String> imageUrlMono = filePart != null 
-                ? minioService.uploadProfilePicture(filePart) 
-                : Mono.just("");
+        // 1. Fetch current profile to get old image URL
+        return Mono.fromCallable(() -> identityServiceGrpcHandler.getProfile(userId))
+                .subscribeOn(Schedulers.boundedElastic())
+                .flatMap(oldProfile -> {
+                    String oldProfilePicUrl = oldProfile.getProfilePic();
 
+                    // 2. Upload new image if file is provided
+                    Mono<String> imageUrlMono = filePart != null
+                            ? minioService.uploadProfilePicture(filePart)
+                            : Mono.just("");
 
-        return imageUrlMono.flatMap(imageUrl -> {
-            String profileUrl = imageUrl.isEmpty() ? null : imageUrl;
+                    return imageUrlMono.flatMap(imageUrl -> {
+                        String profileUrl = imageUrl.isEmpty() ? null : imageUrl;
 
-            UpdateProfileServiceDTO serviceDTO = new UpdateProfileServiceDTO(
-                    profileData != null ? profileData.name() : null,
-                    profileData != null ? profileData.username() : null,
-                    userId,
-                    profileData != null ? profileData.bio() : null,
-                    profileUrl
-            );
+                        UpdateProfileServiceDTO serviceDTO = new UpdateProfileServiceDTO(
+                                profileData != null ? profileData.name() : null,
+                                profileData != null ? profileData.username() : null,
+                                userId,
+                                profileData != null ? profileData.bio() : null,
+                                profileUrl
+                        );
 
-
-            // Offload blocking gRPC call to boundedElastic thread pool
-            return Mono.fromCallable(() -> identityServiceGrpcHandler.updateProfile(serviceDTO))
-                    .subscribeOn(Schedulers.boundedElastic())
-                    .map(grpcResponse -> {
-                        // here also we need to do an users cache storeUser in thoughts table.
-                        UserCache user = new UserCache(userId, serviceDTO.username(), serviceDTO.name(), serviceDTO.profilePicUrl()) ;
-
-                        // this update runs in background. as our motto was to follow eventual consistency
-                        Mono.fromCallable( () -> thoughtsServiceGrpcHandler.userCache(user))
+                        // 3. Offload blocking gRPC call to boundedElastic thread pool
+                        return Mono.fromCallable(() -> identityServiceGrpcHandler.updateProfile(serviceDTO))
                                 .subscribeOn(Schedulers.boundedElastic())
-                                .subscribe(
-                                        empty -> {
-                                            log.info("successfully updated in the thoughts sevice database as well");
-                                        },
-                                        error -> {
-                                            log.error("An Error Occurred while Updating the Thoughts table DB -> "+ error
+                                .map(grpcResponse -> {
+                                    // 4. Update ThoughtsService cache non-blockingly
+                                    UserCache user = new UserCache(userId, serviceDTO.username(), serviceDTO.name(), serviceDTO.profilePicUrl());
+                                    Mono.fromCallable(() -> thoughtsServiceGrpcHandler.userCache(user))
+                                            .subscribeOn(Schedulers.boundedElastic())
+                                            .subscribe(
+                                                    empty -> log.info("successfully updated in the thoughts sevice database as well"),
+                                                    error -> log.error("An Error Occurred while Updating the Thoughts table DB -> " + error)
                                             );
 
-                                            // need to write a fallback for this mechanism currently having no idea on
-                                            // how to build a fallback for it. Currently thinking adding it to kafka
-                                            // and from the kafka reading as consumer and executing it .
-                                        }
-                                );
+                                    // 5. Success: Cleanup old image
+                                    if (filePart != null && oldProfilePicUrl != null && !oldProfilePicUrl.isEmpty()) {
+                                        minioService.deleteProfilePicture(oldProfilePicUrl).subscribe();
+                                    }
 
-                        ResponseDTO<Void> response = ResponseDTO.<Void>builder()
-                                .success(true)
-                                .message("Profile updated successfully")
-                                .build();
-                        return ResponseEntity.ok(response);
+                                    ResponseDTO<Void> response = ResponseDTO.<Void>builder()
+                                            .success(true)
+                                            .message("Profile updated successfully")
+                                            .build();
+                                    return ResponseEntity.ok(response);
+                                })
+                                .onErrorResume(error -> {
+                                    // 6. Failure: Cleanup newly uploaded image
+                                    if (filePart != null && profileUrl != null) {
+                                        minioService.deleteProfilePicture(profileUrl).subscribe();
+                                    }
+                                    return Mono.error(error); // Propagate error to global handler
+                                });
                     });
-        });
+                });
     }
 
 

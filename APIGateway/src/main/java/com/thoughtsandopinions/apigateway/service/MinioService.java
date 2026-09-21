@@ -2,6 +2,7 @@ package com.thoughtsandopinions.apigateway.service;
 
 import io.minio.MinioClient;
 import io.minio.PutObjectArgs;
+import io.minio.RemoveObjectArgs;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.codec.multipart.FilePart;
 import org.springframework.stereotype.Service;
@@ -68,5 +69,28 @@ public class MinioService {
             // Log warning about failed cleanup
             System.err.println("Failed to delete temp file: " + tempFile.toString());
         }
+    }
+
+    public Mono<Void> deleteProfilePicture(String fileUrl) {
+        if (fileUrl == null || fileUrl.isEmpty()) {
+            return Mono.empty();
+        }
+        return Mono.fromRunnable(() -> {
+            try {
+                // Extract object name from URL
+                // URL format: http://localhost:9000/bucketName/objectName
+                String[] parts = fileUrl.split("/");
+                String objectName = parts[parts.length - 1];
+                
+                minioClient.removeObject(
+                        RemoveObjectArgs.builder()
+                                .bucket(bucketName)
+                                .object(objectName)
+                                .build()
+                );
+            } catch (Exception e) {
+                System.err.println("Failed to delete old profile picture from MinIO: " + e.getMessage());
+            }
+        }).subscribeOn(Schedulers.boundedElastic()).then();
     }
 }
