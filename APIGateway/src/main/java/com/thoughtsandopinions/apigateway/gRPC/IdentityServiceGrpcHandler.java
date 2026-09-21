@@ -38,12 +38,12 @@ public class IdentityServiceGrpcHandler {
         }
     }
 
-    public AuthResponse signUp(String username, String email, String password) {
+    public AuthResponse signUp(String username, String email, String password, String name) {
         SignUpRequest request = SignUpRequest.newBuilder()
                 .setUsername(username)
                 .setEmail(email)
                 .setPassword(password)
-                .setName(username)
+                .setName(name)
                 .build();
         return blockingStub.signUp(request);
     }

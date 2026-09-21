@@ -13,6 +13,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import jakarta.validation.Valid;
 import reactor.core.publisher.Mono;
 import reactor.core.scheduler.Schedulers;
 
@@ -31,17 +32,18 @@ public class AuthenticationController {
     }
 
     @PostMapping("/signup")
-    public Mono<ResponseEntity<ResponseDTO<AuthenticationResponse>>> signUp(@RequestBody SignUpDTO request) {
+    public Mono<ResponseEntity<ResponseDTO<AuthenticationResponse>>> signUp(@Valid @RequestBody SignUpDTO request) {
         // We cannot unwrap the mono , the spring webflux unwraps it when the asynchronous operation completes
         return Mono.fromCallable(() -> identityServiceGrpcHandler.signUp(
                 request.username(),
                 request.email(),
-                request.password()
+                request.password(),
+                request.name()
         ))
         .subscribeOn(Schedulers.boundedElastic())
         .map(gRPCResponse -> {
 
-            UserCache user = new UserCache(gRPCResponse.getUserId(), request.username(), null, null) ;
+            UserCache user = new UserCache(gRPCResponse.getUserId(), request.username(), request.name(), null) ;
 
             // adding the user details into thoughts table user_cache in background. Even if it fails
             // that doesn't affect , because our user data will be hold in identity service only primarily.
@@ -76,7 +78,7 @@ public class AuthenticationController {
     }
 
     @PostMapping("/signin")
-    public Mono<ResponseEntity<ResponseDTO<AuthenticationResponse>>> signIn(@RequestBody SignInDTO request) {
+    public Mono<ResponseEntity<ResponseDTO<AuthenticationResponse>>> signIn(@Valid @RequestBody SignInDTO request) {
         return Mono.fromCallable(() -> identityServiceGrpcHandler.signIn(
                 request.username(), 
                 request.password()
