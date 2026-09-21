@@ -1,0 +1,94 @@
+### IntelliJ HTTP Client API Tests
+### Requires 'REST Client' extension in VSCode or IntelliJ IDEA natively.
+
+@host = http://localhost:8080
+@username = testuser1
+@password = Password123!
+
+### 1. Register User 1
+# @name signupUser1
+POST {{host}}/auth/signup
+Content-Type: application/json
+
+{
+  "name": "Test User 1",
+  "username": "{{username}}",
+  "password": "{{password}}"
+}
+
+### 2. Login User 1
+# @name loginUser1
+POST {{host}}/auth/signin
+Content-Type: application/json
+
+{
+  "username": "{{username}}",
+  "password": "{{password}}"
+}
+
+> {%
+    client.global.set("token1", response.body.data.token);
+%}
+
+### 3. Get User 1 Profile
+GET {{host}}/profile/1
+Authorization: Bearer {{token1}}
+
+### 4. Create a Thought
+# @name createThought
+POST {{host}}/thoughts/
+Authorization: Bearer {{token1}}
+Content-Type: application/json
+
+{
+  "content": "This is my first thought on the platform!"
+}
+
+> {%
+    client.global.set("thoughtId", response.body.data.thoughtId);
+%}
+
+### 5. Get the created Thought
+GET {{host}}/thoughts/{{thoughtId}}
+Authorization: Bearer {{token1}}
+
+### 6. Like the Thought
+GET {{host}}/thoughts/interact/{{thoughtId}}
+Authorization: Bearer {{token1}}
+
+### 7. Get Thought Likes
+GET {{host}}/thoughts/likes/{{thoughtId}}?limit=10
+Authorization: Bearer {{token1}}
+
+### 8. Search Users
+GET {{host}}/profile/search/testuser
+Authorization: Bearer {{token1}}
+
+### 9. Create an Opinion (Reply) on the Thought
+POST {{host}}/thoughts/
+Authorization: Bearer {{token1}}
+Content-Type: application/json
+
+{
+  "content": "This is an opinion replying to the first thought.",
+  "parentThoughtId": {{thoughtId}}
+}
+
+### 10. Get Opinions for the Thought
+GET {{host}}/thoughts/opinions/{{thoughtId}}?limit=5
+Authorization: Bearer {{token1}}
+
+### 11. Update Profile (Multipart - requires proper IDE file setup, skipping raw text test here but format shown)
+# PATCH {{host}}/profile/
+# Authorization: Bearer {{token1}}
+# Content-Type: multipart/form-data; boundary=boundary
+#
+# --boundary
+# Content-Disposition: form-data; name="data"
+# Content-Type: application/json
+#
+# {
+#   "bio": "Updated bio via tests!"
+# }
+# --boundary--
+
