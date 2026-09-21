@@ -44,3 +44,51 @@ In this architecture, custom business exceptions thrown by backend microservices
 2. **Translation to gRPC Status:** When a custom exception (like `UserNotFoundException` or `AlreadyFollowingException`) is thrown, this handler catches it *before* it leaves the microservice. It maps the custom exception to a standard gRPC `Status` (e.g., `Status.NOT_FOUND` or `Status.ALREADY_EXISTS`) and returns it as a `StatusException`.
 3. **Gateway Handling:** The API Gateway receives a `StatusRuntimeException`. The `@RestControllerAdvice` (`GlobalExceptionHandler`) in the Gateway catches this exception, inspects the gRPC status code, and translates it into the appropriate HTTP status code (e.g., 404 Not Found, 409 Conflict, 400 Bad Request).
 4. **Final Response:** The user receives a clean, standardized JSON `ResponseDTO` containing the success flag, the error message, and the correct HTTP status code.
+
+## 🧪 Testing & Simulation
+
+To thoroughly test the ecosystem and simulate real-world traffic, you have three primary methods available. All tests assume that your core microservices (API Gateway, Identity Service, and Thoughts Service) are actively running.
+
+### 1. Automated Social Traffic Simulation (`simulate_traffic.sh`)
+This script executes a full end-to-end integration test by mimicking a burst of user activity. It requires no external HTTP clients, just a standard bash terminal.
+
+**What it does:**
+1. Registers 10 unique users.
+2. Logs them in to generate and extract JWT Auth Tokens.
+3. User 1 creates a viral "Thought".
+4. Users 2 through 10 like the thought.
+5. Users 2 through 5 write opinion replies to the thought.
+6. Users 6 through 10 follow User 1.
+7. Fetches and displays the resulting Likes Feed, Opinions Feed, and Followers Feed.
+
+**How to run it:**
+```bash
+chmod +x simulate_traffic.sh
+./simulate_traffic.sh
+```
+
+### 2. Full Edge-Case API Verification (`test_remaining_apis.sh`)
+This script tests the remaining "destructive" and edge-case REST endpoints that aren't covered by the main traffic simulation.
+
+**What it covers:**
+* Fetching customized User Feeds and specific Profile Data.
+* Unliking a thought.
+* Listing Reposts.
+* Deleting a thought completely.
+* Unfollowing a user.
+* Fetching the customized Following list.
+
+**How to run it:**
+```bash
+chmod +x test_remaining_apis.sh
+./test_remaining_apis.sh
+```
+
+### 3. Manual IDE Testing (`api-tests.http`)
+For granular, manual testing, an `api-tests.http` file is provided in the root directory. This is standard format for IDE-based HTTP Clients (like IntelliJ IDEA Premium, or VSCode with the "REST Client" extension).
+
+**How to use:**
+1. Open `api-tests.http` in your supported IDE.
+2. Ensure you execute the `POST /auth/signin` blocks first. The IDE will automatically capture the returned JWT Token into an environment variable (e.g. `{{token1}}`).
+3. Click "Run" next to any subsequent request to test specific behaviors independently.
+4. Note: Multipart Form requests (like Profile Picture uploads via `PATCH /profile/`) are commented out and require valid local file path configurations in your IDE to test successfully.
