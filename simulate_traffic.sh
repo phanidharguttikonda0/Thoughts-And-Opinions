@@ -22,7 +22,7 @@ for i in {1..10}; do
     # Register
     curl -s -X POST "${HOST}/auth/signup" \
          -H "Content-Type: application/json" \
-         -d "{\"email\": \"${EMAIL}\", \"username\": \"${USERNAME}\", \"password\": \"${PASSWORD}\"}" > /dev/null
+         -d "{\"email\": \"${EMAIL}\", \"username\": \"${USERNAME}\", \"name\": \"${USERNAME}\", \"password\": \"${PASSWORD}\"}" > /dev/null
 
     # Login and extract token
     RESPONSE=$(curl -s -X POST "${HOST}/auth/signin" \

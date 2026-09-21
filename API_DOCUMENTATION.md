@@ -17,6 +17,7 @@ Some endpoints (like profile updates) will also automatically receive the `X-Use
   ```json
   {
     "email": "johndoe@example.com",
+    "name": "John Doe",
     "username": "johndoe",
     "password": "SecurePassword123"
   }
@@ -32,6 +33,7 @@ Some endpoints (like profile updates) will also automatically receive the `X-Use
   }
   ```
 - **Error Consequences:**
+  - `400 Bad Request`: If validation fails (e.g., blank fields, short password).
   - `409 Conflict`: If the username is already taken. (Mapped from `Status.ALREADY_EXISTS`)
 
 ### 1.2 Sign In
@@ -55,6 +57,7 @@ Some endpoints (like profile updates) will also automatically receive the `X-Use
   }
   ```
 - **Error Consequences:**
+  - `400 Bad Request`: If validation fails (e.g., blank fields).
   - `403 Forbidden`: Invalid credentials passed. (Mapped from `Status.PERMISSION_DENIED`)
   - `404 Not Found`: User does not exist. (Mapped from `Status.NOT_FOUND`)
 

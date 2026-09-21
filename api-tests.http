@@ -12,6 +12,7 @@ Content-Type: application/json
 
 {
   "email": "testuser1@example.com",
+  "name": "Test User",
   "username": "{{username}}",
   "password": "{{password}}"
 }
