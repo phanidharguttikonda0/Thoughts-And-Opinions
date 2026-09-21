@@ -1,0 +1,106 @@
+syntax = "proto3";
+package identity;
+import "google/protobuf/empty.proto";
+import "google/protobuf/timestamp.proto";
+
+option java_multiple_files = true;
+
+
+service IdentityGatewayService {
+  rpc signUp (SignUpRequest) returns (AuthResponse);          // POST /auth/signup
+  rpc login (LoginRequest) returns (AuthResponse);            // POST /auth/login
+  rpc updateProfile (UpdateProfileRequest) returns (google.protobuf.Empty);   // PATCH /profile
+  rpc followUser (FollowRequest) returns (google.protobuf.Empty);             // POST /users/{id}/follow
+  rpc unfollowUser (FollowRequest) returns (google.protobuf.Empty);           // DELETE /users/{id}/follow
+  rpc getUserProfile (GetUserRequest) returns (ProfileData);  // GET /users/{username}
+  rpc searchUsers (SearchRequest) returns (SearchResponse);   // GET /search/users?q=
+  rpc getFollowersList (UsersListRequest) returns (UsersListResponse) ;
+  rpc getFollowingList (UsersListRequest) returns (UsersListResponse) ;
+  rpc isFollowing (FollowRequest) returns (IsFollowingResponse);
+}
+
+message UsersListRequest {
+  int64 user_id = 1;
+  int32 limit = 2; // by default limit will be 20, that we will set in API Gateway
+  optional string cursor = 3; // is the created_at timestamp
+}
+
+message UsersListResponse {
+  repeated UserDetails users = 1;
+  string next_cursor = 2 ;
+}
+
+//* IMPORTANT NEXT STEP
+// need to implement get followersList , get followingList using cursor pagination
+// and need to mention those 2 functionalities in the .proto file
+
+message SignUpRequest {
+  string email = 1;
+  string username = 2;
+  string password = 3;
+  string name = 4 ;
+}
+
+message LoginRequest {
+  string username = 1;
+  string password = 2;
+}
+
+message AuthResponse {
+  int64 user_id = 1; // maps correctly with java long field and BIG INT Field in Database
+  string jwt_token = 2;
+}
+
+// ==========================================
+// Profile & User Models
+// ==========================================
+
+message ProfileData {
+  int64 user_id = 1;
+  string username = 2;
+  string name = 3;
+  string bio = 4;
+  string profile_pic = 5;
+  int32 followers_count = 6;
+  int32 following_count = 7;
+  google.protobuf.Timestamp joined_at = 8;
+}
+
+message UpdateProfileRequest {
+  // Using 'optional' is perfect for PATCH requests.
+  // It allows Java to differentiate between a null value (don't update)
+  // and an empty string (clear the field).
+  int64 user_id = 1;              // The ID of the user being updated
+  optional string name = 2;
+  optional string bio = 3;
+  optional string avatar_url = 4;
+  optional string username = 5;
+}
+
+message GetUserRequest {
+  int64 user_id = 1;
+}
+
+message FollowRequest {
+  int64 user_id = 1; // The user making the request (extracted from JWT by Gateway)
+  int64 target_user_id = 2; // The user they want to follow/unfollow
+}
+
+message SearchRequest {
+  string query = 1;       // we apply Like username% and return the top 5
+}
+
+message UserDetails {
+  int64 user_id = 1;
+  string username = 2 ;
+  string name = 3;
+  string profile_pic = 4;
+}
+
+message SearchResponse {
+  repeated UserDetails users = 1;  // 'repeated' acts as a List/Array in Java
+}
+
+message IsFollowingResponse {
+  bool is_following = 1;
+}

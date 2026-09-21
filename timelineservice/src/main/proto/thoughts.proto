@@ -1,0 +1,128 @@
+syntax = "proto3";
+package thoughts;
+import "google/protobuf/empty.proto";
+import "google/protobuf/timestamp.proto";
+
+service ThoughtGatewayService {
+  rpc createThought (CreateRequest) returns (CreateResponse); // POST /thoughts
+  rpc deleteThought (DeleteRequest) returns (google.protobuf.Empty);          // DELETE /thoughts/{id}
+  rpc likeThought (LikeRequest) returns (google.protobuf.Empty);              // POST /thoughts/{id}/like
+  rpc unlikeThought (LikeRequest) returns (google.protobuf.Empty);            // DELETE /thoughts/{id}/like
+
+  rpc storeUser(Users) returns (google.protobuf.Empty) ;
+
+  // GET /thoughts/{id}/likes?cursor=
+  rpc getThoughtLikes (GetLikesRequest) returns (GetLikesResponse);
+
+  // GET /thoughts/{parent_thought_id}/opinions?cursor=
+  rpc getOpinions (GetOpinionsRequest) returns (GetOpinionsResponse);
+
+  // GET /users/{username}/feed?cursor=
+  rpc getUserHistory (GetUserHistoryRequest) returns (GetHistoryResponse);
+
+  rpc getThought(GetThoughtRequest) returns (GetThoughtResponse) ;
+
+  rpc getReposts(GetRepostsRequest) returns (GetRepostsResponse) ;
+}
+
+
+message CreateRequest {
+  optional string content = 1; // if content is null, then it was a repost
+  int64 user_id = 2; // created user_id
+  optional int64 parent_thought_id = 3; // it can be null, if it is a first post
+  // we will send notification to the user whose parent_thought_id was mentioned.
+  // it's like a reply for him
+  repeated string media_urls = 4; // for a thought we can attach media. The API gateway stores that
+  // and sends urls.
+}
+
+message CreateResponse {
+  int64 thought_id = 1;
+  google.protobuf.Timestamp createdAt = 2;
+}
+
+message DeleteRequest {
+  int64 user_id = 1; // if the owner of the thought was not this user, not going to delete
+  int64 thought_id = 2;
+}
+
+message LikeRequest {
+  int64 user_id = 1;
+  int64 thought_id = 2;
+}
+
+message GetThoughtRequest {
+  int64 thought_id = 1;
+}
+
+message GetThoughtResponse {
+  int64 thought_id = 1;
+  Users user = 2 ;
+  string content = 3;
+  int32 likes_count = 4;
+  int32 opinions_count = 5; // when we click on opinions, we will return list of opinions via cursor pagination
+  int32 reposts_count = 6;
+  int64 parent_thought_id = 7;
+  google.protobuf.Timestamp createdAt = 8;
+}
+
+message GetLikesRequest {
+  int64 thought_id = 1; // going to return list of liked users list
+  int32 limit = 2 ;
+  optional string cursor = 3 ; // for initial time getting list, there is no cursor
+}
+
+message Users{
+  int64 user_id = 1;
+  string username = 2;
+  string name = 3 ;
+  optional string profile_pic_url = 4 ;
+}
+
+message GetLikesResponse {
+  repeated  Users liked_users = 1 ;
+  string next_cursor = 2 ;
+}
+
+message GetOpinionsRequest {
+  int64 thought_id = 1;
+  int32 limit = 2 ;
+  optional string cursor = 3 ;
+}
+
+message GetOpinionsResponse {
+  repeated GetThoughtResponse opinions_list = 1 ;
+  string next_cursor = 2 ;
+}
+
+message GetUserHistoryRequest {
+  int64 user_id = 1 ;
+  int32 limit = 2 ;
+  optional string cursor = 3 ;
+}
+
+message ThoughtDetails {
+  int64 thought_id = 1;
+  string content = 2;
+  int32 likes_count = 3;
+  int32 opinions_count = 4; // when we click on opinions, we will return list of opinions via cursor pagination
+  int32 reposts_count = 5;
+  int64 parent_thought_id = 6;
+  google.protobuf.Timestamp createdAt = 7;
+}
+
+message GetHistoryResponse {
+  repeated ThoughtDetails thoughts_list = 1 ; // we are going to return the list of thoughts and opinions of the user
+  string next_cursor = 2 ;
+}
+
+message GetRepostsRequest {
+  int64 thought_id = 1;
+  int32 limit = 2 ;
+  optional string cursor = 3 ;
+}
+
+message GetRepostsResponse {
+    repeated Users reposted_users_list = 1;
+    string next_cursor = 2 ;
+}
