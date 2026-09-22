@@ -6,8 +6,8 @@ import jakarta.annotation.PostConstruct;
 import jakarta.annotation.PreDestroy;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
-import thoughts.GetThoughtRequest;
-import thoughts.GetThoughtResponse;
+import thoughts.Thoughts.GetThoughtRequest;
+import thoughts.Thoughts.GetThoughtResponse;
 import thoughts.ThoughtGatewayServiceGrpc;
 import thoughts.ThoughtGatewayServiceGrpc.ThoughtGatewayServiceBlockingStub;
 
