@@ -1,6 +1,9 @@
 spring:
   application:
     name: timelineservice
+  grpc:
+    server:
+      port: 9094
   data:
     redis:
       host: ${REDIS_HOST:localhost}
