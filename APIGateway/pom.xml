@@ -57,6 +57,13 @@
             <version>${spring-grpc.version}</version>
         </dependency>
 
+        <!-- Kafka -->
+        <dependency>
+            <groupId>org.springframework.kafka</groupId>
+            <artifactId>spring-kafka</artifactId>
+        </dependency>
+
+
         <!-- JWT Handling -->
         <dependency>
             <groupId>io.jsonwebtoken</groupId>

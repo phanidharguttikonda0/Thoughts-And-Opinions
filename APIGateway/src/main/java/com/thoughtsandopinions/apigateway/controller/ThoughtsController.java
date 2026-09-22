@@ -8,6 +8,7 @@ import com.thoughtsandopinions.apigateway.dto.api.ResponseDTO;
 import com.thoughtsandopinions.apigateway.dto.api.ThoughtDetailsDTO;
 import com.thoughtsandopinions.apigateway.gRPC.ThoughtsServiceGrpcHandler;
 import org.springframework.http.ResponseEntity;
+import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.web.bind.annotation.*;
 import reactor.core.publisher.Mono;
 import reactor.core.scheduler.Schedulers;
@@ -18,9 +19,11 @@ import thoughts.Thoughts;
 public class ThoughtsController {
 
     private final ThoughtsServiceGrpcHandler thoughtsServiceGrpcHandler ;
+    private final KafkaTemplate<String, Object> kafkaTemplate;
 
-    public ThoughtsController(ThoughtsServiceGrpcHandler thoughtsServiceGrpcHandler) {
+    public ThoughtsController(ThoughtsServiceGrpcHandler thoughtsServiceGrpcHandler, KafkaTemplate<String, Object> kafkaTemplate) {
         this.thoughtsServiceGrpcHandler = thoughtsServiceGrpcHandler ;
+        this.kafkaTemplate = kafkaTemplate;
     }
 
 
@@ -31,6 +34,15 @@ public class ThoughtsController {
                 .subscribeOn(Schedulers.boundedElastic())
                 .map(response -> {
                     CreateThoughtResponseDTO dto = DtoMapper.map(response);
+                    
+                    // Publish event to Kafka for the Timeline Service to consume
+                    ThoughtCreatedEvent event = new ThoughtCreatedEvent(
+                            String.valueOf(dto.thoughtId()),
+                            String.valueOf(userId),
+                            System.currentTimeMillis() // Using current time as createdAt score
+                    );
+                    kafkaTemplate.send("thought.created", event);
+                    
                     return ResponseEntity.ok(
                         ResponseDTO.<CreateThoughtResponseDTO>builder()
                                 .success(true)
