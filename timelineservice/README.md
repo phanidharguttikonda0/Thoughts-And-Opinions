@@ -18,9 +18,12 @@ When a user publishes a new thought, we need to immediately distribute it to all
 The feed data is stored entirely in memory using Redis.
 *   **Data Structure:** We use a Redis Sorted Set (`ZSET`) for each user (Key: `feed:{user_id}`).
 *   **Chronological Order:** The "score" for each entry in the ZSET is the `createdAt` timestamp of the thought. This automatically sorts the feed strictly by time.
-*   **LRU / Feed Capping:** To optimize RAM usage, we maintain a hard limit of **120 latest posts** per user. 
-    *   This is achieved using Redis's built-in trimming. Every time a new thought is added via `ZADD`, we immediately run `ZREMRANGEBYRANK feed:{user_id} 0 -121`. 
-    *   This instantly drops the oldest items, keeping only the 120 newest posts. Read items are NOT actively deleted, preventing the "empty feed" problem if a user refreshes the app.
+*   **ZSET Operations and Parameters Explained:**
+    *   `ZADD feed:{user_id} {timestamp} {thought_id}`: Appends the newly created thought to the user's timeline. The score is the timestamp, and the value is the thought ID.
+    *   `ZREVRANGE feed:{user_id} 0 {limit-1} WITHSCORES`: Used to fetch the initial page of the user's feed. It retrieves elements in descending order (highest score/most recent first) from rank 0 to the specified limit.
+    *   `ZREVRANGEBYSCORE feed:{user_id} {cursor-1} -inf LIMIT 0 {limit} WITHSCORES`: Used for cursor-based pagination. It retrieves elements strictly older than the `cursor` (which is the timestamp of the last seen post), fetching the next `limit` number of items.
+    *   `ZREMRANGEBYRANK feed:{user_id} 0 -101`: Trims the size of the set. Ranks in ZSET are ordered from lowest score (oldest) to highest score (newest). Rank `0` is the absolute oldest element, and rank `-1` is the absolute newest element. Thus, `-101` represents the 100th-from-the-newest element.
+*   **Feed Capping Logic:** To optimize RAM usage while avoiding excessive trim operations, we allow the timeline to grow up to 120 items. Every time a new thought is added via `ZADD`, we check the size of the feed. If the size reaches or exceeds **120**, we execute `ZREMRANGEBYRANK feed:{user_id} 0 -101`. This deletes the oldest 20+ items, accurately leaving exactly the 100 most recent items in the feed.
 
 ### 3. Read Path & Hydration (gRPC Server)
 The Timeline Service does not expose HTTP REST APIs; instead, it operates as a **gRPC Server** (`TimelineGatewayService`).
