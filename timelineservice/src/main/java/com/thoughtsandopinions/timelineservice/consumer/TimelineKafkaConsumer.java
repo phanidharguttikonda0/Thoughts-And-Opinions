@@ -18,7 +18,7 @@ public class TimelineKafkaConsumer {
     private final StringRedisTemplate redisTemplate;
     private final IdentityServiceGrpcHandler identityServiceGrpcHandler;
 
-    @KafkaListener(topics = "thought.created", groupId = "timeline-service-group")
+    @KafkaListener(topics = "thought.created", groupId = "timeline-service-group-5")
     public void consumeThoughtCreatedEvent(ThoughtCreatedEvent event) {
         log.info("Received ThoughtCreatedEvent: {}", event);
         try {

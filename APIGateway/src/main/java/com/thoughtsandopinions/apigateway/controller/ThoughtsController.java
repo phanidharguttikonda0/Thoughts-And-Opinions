@@ -22,7 +22,7 @@ public class ThoughtsController {
     private final KafkaTemplate<String, Object> kafkaTemplate;
 
     public ThoughtsController(ThoughtsServiceGrpcHandler thoughtsServiceGrpcHandler, KafkaTemplate<String, Object> kafkaTemplate) {
-        this.thoughtsServiceGrpcHandler = thoughtsServiceGrpcHandler ;
+        this.thoughtsServiceGrpcHandler = thoughtsServiceGrpcHandler;
         this.kafkaTemplate = kafkaTemplate;
     }
 
@@ -41,8 +41,15 @@ public class ThoughtsController {
                             String.valueOf(userId),
                             System.currentTimeMillis() // Using current time as createdAt score
                     );
-                    kafkaTemplate.send("thought.created", event);
-                    
+                    java.util.concurrent.CompletableFuture<org.springframework.kafka.support.SendResult<String, Object>> future = kafkaTemplate.send("thought.created", event);
+                    future.whenComplete((result, ex) -> {
+                        if (ex == null) {
+                            System.out.println("Kafka message sent successfully to topic thought.created");
+                        } else {
+                            System.out.println("Error sending Kafka message: " + ex.getMessage());
+                            ex.printStackTrace();
+                        }
+                    });                    
                     return ResponseEntity.ok(
                         ResponseDTO.<CreateThoughtResponseDTO>builder()
                                 .success(true)
