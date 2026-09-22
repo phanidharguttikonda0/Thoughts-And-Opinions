@@ -30,6 +30,11 @@ thoughts:
     host: localhost
     port: 9091
 
+timeline:
+  grpc:
+    host: localhost
+    port: 9094
+
 minio:
   endpoint: http://localhost:9000
   access-key: admin

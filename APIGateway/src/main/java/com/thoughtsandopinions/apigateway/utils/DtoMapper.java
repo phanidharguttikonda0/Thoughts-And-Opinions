@@ -77,4 +77,11 @@ public class DtoMapper {
                 toOffsetDateTime(response.getCreatedAt())
         );
     }
+
+    public static ThoughtsFeedDTO map(timeline.Timeline.GetFeedResponse response) {
+        return new ThoughtsFeedDTO(
+                response.getThoughtsListList().stream().map(DtoMapper::map).toList(),
+                !response.getNextCursor().isEmpty() ? response.getNextCursor() : null
+        );
+    }
 }
