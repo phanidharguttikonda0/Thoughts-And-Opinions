@@ -1,0 +1,53 @@
+@import "tailwindcss";
+
+@theme {
+  --color-primary: #1D9BF0;
+  --color-primary-hover: #1A8CD8;
+  --color-like: #F91880;
+  --color-like-hover: #E01470;
+  --color-repost: #00BA7C;
+  --color-repost-hover: #00A66E;
+
+  --color-bg-light: #FFFFFF;
+  --color-bg-light-alt: #F7F9F9;
+  --color-text-light: #0F1419;
+  --color-text-light-muted: #536471;
+  --color-border-light: #EFF3F4;
+
+  --color-bg-dark: #15202b; 
+  --color-bg-dark-alt: #1e2732;
+  --color-text-dark: #FFFFFF;
+  --color-text-dark-muted: #8b98a5;
+  --color-border-dark: #38444d;
+}
+
+:root {
+  --bg-primary: var(--color-bg-light);
+  --bg-secondary: var(--color-bg-light-alt);
+  --text-primary: var(--color-text-light);
+  --text-secondary: var(--color-text-light-muted);
+  --border-color: var(--color-border-light);
+}
+
+.dark {
+  --bg-primary: var(--color-bg-dark);
+  --bg-secondary: var(--color-bg-dark-alt);
+  --text-primary: var(--color-text-dark);
+  --text-secondary: var(--color-text-dark-muted);
+  --border-color: var(--color-border-dark);
+}
+
+body {
+  background-color: var(--bg-primary);
+  color: var(--text-primary);
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+  transition: background-color 0.3s ease, color 0.3s ease;
+}
+
+/* Glassmorphism utility */
+.glass {
+  background: rgba(var(--bg-primary), 0.7);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border-bottom: 1px solid var(--border-color);
+}
