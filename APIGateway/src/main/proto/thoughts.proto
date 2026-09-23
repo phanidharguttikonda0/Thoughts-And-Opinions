@@ -15,12 +15,12 @@ service ThoughtGatewayService {
   rpc getThoughtLikes (GetLikesRequest) returns (GetLikesResponse);
 
   // GET /thoughts/{parent_thought_id}/opinions?cursor=
-  rpc getOpinions (GetOpinionsRequest) returns (GetOpinionsResponse); // pending
+  rpc getOpinions (GetOpinionsRequest) returns (GetOpinionsResponse);
 
   // GET /users/{username}/feed?cursor=
   rpc getUserHistory (GetUserHistoryRequest) returns (GetHistoryResponse);
 
-  rpc getThought(GetThoughtRequest) returns (GetThoughtResponse) ; // pending
+  rpc getThought(GetThoughtRequest) returns (GetThoughtResponse) ;
 
   rpc getReposts(GetRepostsRequest) returns (GetRepostsResponse) ;
 }
@@ -53,6 +53,7 @@ message LikeRequest {
 
 message GetThoughtRequest {
   int64 thought_id = 1;
+  optional int64 user_id = 2;
 }
 
 message GetThoughtResponse {
@@ -64,6 +65,8 @@ message GetThoughtResponse {
   int32 reposts_count = 6;
   int64 parent_thought_id = 7;
   google.protobuf.Timestamp createdAt = 8;
+  bool is_liked = 9;
+  bool is_reposted = 10;
 }
 
 message GetLikesRequest {
@@ -99,6 +102,7 @@ message GetUserHistoryRequest {
   int64 user_id = 1 ;
   int32 limit = 2 ;
   optional string cursor = 3 ;
+  optional int64 logged_in_user_id = 4;
 }
 
 message ThoughtDetails {
@@ -109,6 +113,8 @@ message ThoughtDetails {
   int32 reposts_count = 5;
   int64 parent_thought_id = 6;
   google.protobuf.Timestamp createdAt = 7;
+  bool is_liked = 8;
+  bool is_reposted = 9;
 }
 
 message GetHistoryResponse {
@@ -123,6 +129,7 @@ message GetRepostsRequest {
 }
 
 message GetRepostsResponse {
-  repeated Users reposted_users_list = 1;
-  string next_cursor = 2 ;
+    repeated Users reposted_users_list = 1;
+    string next_cursor = 2 ;
 }
+

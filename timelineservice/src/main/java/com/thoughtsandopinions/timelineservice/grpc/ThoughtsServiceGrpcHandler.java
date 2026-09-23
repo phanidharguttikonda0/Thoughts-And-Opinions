@@ -38,11 +38,12 @@ public class ThoughtsServiceGrpcHandler {
         }
     }
 
-    public GetThoughtResponse getThought(Long thoughtId) {
-        GetThoughtRequest request = GetThoughtRequest.newBuilder()
-                .setThoughtId(thoughtId)
-                .build();
-        
-        return blockingStub.getThought(request);
+    public GetThoughtResponse getThought(Long thoughtId, Long userId) {
+        GetThoughtRequest.Builder request = GetThoughtRequest.newBuilder()
+                .setThoughtId(thoughtId);
+        if (userId != null) {
+            request.setUserId(userId);
+        }
+        return blockingStub.getThought(request.build());
     }
 }

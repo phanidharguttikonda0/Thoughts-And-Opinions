@@ -53,10 +53,9 @@ public class ThoughtsEntity implements Serializable {
     @Column(name = "created_at", updatable = false)
     private OffsetDateTime createdAt ;
 
-    // making bidirectional, we are not using the cascade and removing orphan, because
-    // the only way to delete thought from opinions is, from user thought , from there
-    // only it should be removed.
-    @OneToMany(mappedBy = "parentThought")
+    // Added cascade and orphanRemoval so that deleting a thought deletes its opinions/reposts
+    // Otherwise we get TransientPropertyValueException because child thoughts still reference the deleted parent.
+    @OneToMany(mappedBy = "parentThought", cascade = CascadeType.ALL, orphanRemoval = true)
     private Set<ThoughtsEntity> opinions = new HashSet<>() ;
 
     @OneToMany(mappedBy = "thought", cascade = CascadeType.ALL, orphanRemoval = true)

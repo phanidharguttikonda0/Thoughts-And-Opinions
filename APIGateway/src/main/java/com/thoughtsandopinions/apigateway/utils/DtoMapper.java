@@ -38,7 +38,7 @@ public class DtoMapper {
                 profile.getName(),
                 profile.getUsername(),
                 profile.getBio(),
-                profile.getProfilePic(),
+                !profile.getProfilePic().isEmpty() ? profile.getProfilePic() : null,
                 profile.getFollowersCount(),
                 profile.getFollowingCount(),
                 toOffsetDateTime(profile.getJoinedAt())
@@ -54,7 +54,9 @@ public class DtoMapper {
                 response.getOpinionsCount(),
                 response.getRepostsCount(),
                 response.getParentThoughtId() != 0 ? response.getParentThoughtId() : null,
-                toOffsetDateTime(response.getCreatedAt())
+                toOffsetDateTime(response.getCreatedAt()),
+                response.getIsLiked(),
+                response.getIsReposted()
         );
     }
 
@@ -67,7 +69,9 @@ public class DtoMapper {
                 details.getOpinionsCount(),
                 details.getRepostsCount(),
                 details.getParentThoughtId() != 0 ? details.getParentThoughtId() : null,
-                toOffsetDateTime(details.getCreatedAt())
+                toOffsetDateTime(details.getCreatedAt()),
+                details.getIsLiked(),
+                details.getIsReposted()
         );
     }
 

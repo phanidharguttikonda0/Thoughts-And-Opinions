@@ -64,6 +64,7 @@ public class AuthenticationController {
 
             AuthenticationResponse authResponse = AuthenticationResponse.builder()
                     .token(gRPCResponse.getJwtToken())
+                    .userId(gRPCResponse.getUserId())
                     .build();
 
             ResponseDTO<AuthenticationResponse> responseDTO = ResponseDTO.<AuthenticationResponse>builder()
@@ -87,6 +88,7 @@ public class AuthenticationController {
         .map(gRPCResponse -> {
             AuthenticationResponse authResponse = AuthenticationResponse.builder()
                     .token(gRPCResponse.getJwtToken())
+                    .userId(gRPCResponse.getUserId())
                     .build();
 
             ResponseDTO<AuthenticationResponse> responseDTO = ResponseDTO.<AuthenticationResponse>builder()

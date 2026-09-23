@@ -22,10 +22,20 @@ import java.util.Optional;
 public class ThoughtsService {
 
     private final ThoughtsRepository thoughtsRepo ;
+    private final com.thoughtsandopinions.thoughtsservice.repository.LikesRepository likesRepo ;
     private static final Logger log = LoggerFactory.getLogger(ThoughtsService.class);
 
-    public ThoughtsService(ThoughtsRepository thoughtsRepo){
+    public ThoughtsService(ThoughtsRepository thoughtsRepo, com.thoughtsandopinions.thoughtsservice.repository.LikesRepository likesRepo){
         this.thoughtsRepo = thoughtsRepo ;
+        this.likesRepo = likesRepo ;
+    }
+
+    public boolean isLikedByUser(long userId, long thoughtId) {
+        return likesRepo.existsById(new com.thoughtsandopinions.thoughtsservice.entity.LikesId(userId, thoughtId));
+    }
+
+    public boolean isRepostedByUser(long userId, long thoughtId) {
+        return thoughtsRepo.existsByUserIdAndParentThoughtIdAndContentIsNull(userId, thoughtId);
     }
 
     @Transactional

@@ -47,7 +47,7 @@ public class TimelineGrpcService extends TimelineGatewayServiceGrpc.TimelineGate
                 if (thoughtIdStr != null) {
                     try {
                         Long thoughtId = Long.parseLong(thoughtIdStr);
-                        GetThoughtResponse thoughtResponse = thoughtGatewayServiceGrpcHandler.getThought(thoughtId);
+                        GetThoughtResponse thoughtResponse = thoughtGatewayServiceGrpcHandler.getThought(thoughtId, userId);
                         if (thoughtResponse != null) {
                             responseBuilder.addThoughtsList(thoughtResponse);
                         }

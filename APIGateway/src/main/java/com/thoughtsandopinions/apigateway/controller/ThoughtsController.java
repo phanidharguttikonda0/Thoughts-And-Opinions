@@ -139,8 +139,10 @@ public class ThoughtsController {
     }
 
     @GetMapping("/{thoughtId}") // returns the Thought
-    public Mono<ResponseEntity<ResponseDTO<ThoughtDetailsDTO>>> getThought(@PathVariable("thoughtId") Long thoughtId) {
-        return Mono.fromCallable(() -> thoughtsServiceGrpcHandler.getThought(thoughtId))
+    public Mono<ResponseEntity<ResponseDTO<ThoughtDetailsDTO>>> getThought(
+            @PathVariable("thoughtId") Long thoughtId,
+            @RequestHeader(value = "X-User-Id", required = false) Long userId) {
+        return Mono.fromCallable(() -> thoughtsServiceGrpcHandler.getThought(thoughtId, userId))
                 .subscribeOn(Schedulers.boundedElastic())
                 .map(response -> {
 

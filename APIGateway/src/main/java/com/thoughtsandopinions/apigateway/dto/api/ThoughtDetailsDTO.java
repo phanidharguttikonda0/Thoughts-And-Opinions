@@ -12,5 +12,7 @@ public record ThoughtDetailsDTO (
         int opinionsCount,
         int repostsCount,
         Long parentThoughtId,
-        OffsetDateTime createdAt
+        OffsetDateTime createdAt,
+        boolean isLiked,
+        boolean isReposted
 ) {}

@@ -219,6 +219,12 @@ public class ThoughtsGrpcService extends ThoughtGatewayServiceGrpc.ThoughtGatewa
                 thoughtBuilder.setCreatedAt(joinedAtTimestamp);
             }
 
+            if (request.hasLoggedInUserId()) {
+                long loggedInUserId = request.getLoggedInUserId();
+                thoughtBuilder.setIsLiked(thoughtsService.isLikedByUser(loggedInUserId, t.getThoughtId()));
+                thoughtBuilder.setIsReposted(thoughtsService.isRepostedByUser(loggedInUserId, t.getThoughtId()));
+            }
+
             resp.addThoughtsList(thoughtBuilder);
 
             if(i == thoughts.size()-1 && t.getCreatedAt() != null) {
@@ -271,6 +277,12 @@ public class ThoughtsGrpcService extends ThoughtGatewayServiceGrpc.ThoughtGatewa
                     .setNanos(instant.getNano())
                     .build();
             resp.setCreatedAt(joinedAtTimestamp) ;
+        }
+
+        if (request.hasUserId()) {
+            long userId = request.getUserId();
+            resp.setIsLiked(thoughtsService.isLikedByUser(userId, thought.getThoughtId()));
+            resp.setIsReposted(thoughtsService.isRepostedByUser(userId, thought.getThoughtId()));
         }
 
         responseObserver.onNext(resp.build());

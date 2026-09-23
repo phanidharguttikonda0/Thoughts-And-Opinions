@@ -155,9 +155,10 @@ public class ProfileController {
     @GetMapping("/{id}/feed")
     public Mono<ResponseEntity<ResponseDTO<ThoughtsFeedDTO>>> getProfileFeed(@PathVariable("id") Long userId,
                                                                              @RequestParam(value = "limit", defaultValue = "10") Integer limit,
-                                                                             @RequestParam(value = "cursor", required = false) String cursor) {
+                                                                             @RequestParam(value = "cursor", required = false) String cursor,
+                                                                             @RequestHeader(value = "X-User-Id", required = false) Long loggedInUserId) {
 
-        return Mono.fromCallable(() -> thoughtsServiceGrpcHandler.getUserProfileFeed(userId, limit, cursor))
+        return Mono.fromCallable(() -> thoughtsServiceGrpcHandler.getUserProfileFeed(userId, limit, cursor, loggedInUserId))
                 .subscribeOn(Schedulers.boundedElastic())
                 .map(gRPCResponse -> {
                     java.util.List<ThoughtDetailsDTO> thoughtsList = gRPCResponse.getThoughtsListList().stream()

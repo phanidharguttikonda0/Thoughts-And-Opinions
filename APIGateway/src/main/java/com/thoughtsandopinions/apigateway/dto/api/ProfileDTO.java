@@ -7,7 +7,7 @@ public record ProfileDTO(
         String name,
         String username,
         String bio,
-        String profilePic,
+        String profilePicUrl,
         int followersCount,
         int followingCount,
         OffsetDateTime joinedAt

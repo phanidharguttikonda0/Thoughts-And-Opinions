@@ -38,63 +38,66 @@ public class ThoughtsServiceGrpcHandler {
         }
     }
 
-
     public Empty userCache(UserCache user) {
-        Thoughts.Users.Builder userBuilder = Thoughts.Users.newBuilder() ;
+        Thoughts.Users.Builder userBuilder = Thoughts.Users.newBuilder();
 
-        userBuilder.setUserId(user.userId()) ;
+        userBuilder.setUserId(user.userId());
 
-        if(user.username() != null) {
-            userBuilder.setUsername(user.username()) ;
+        if (user.username() != null) {
+            userBuilder.setUsername(user.username());
         }
 
-        if(user.name() != null ){
-            userBuilder.setName(user.name()) ;
+        if (user.name() != null) {
+            userBuilder.setName(user.name());
         }
 
-        if(user.profilePicUrl() != null) {
-            userBuilder.setProfilePicUrl(user.profilePicUrl()) ;
+        if (user.profilePicUrl() != null) {
+            userBuilder.setProfilePicUrl(user.profilePicUrl());
         }
 
-        return blockingStub.storeUser(userBuilder.build()) ;
+        return blockingStub.storeUser(userBuilder.build());
     }
 
-    public Thoughts.GetHistoryResponse getUserProfileFeed(Long userId, int limit, String cursor) {
+    public Thoughts.GetHistoryResponse getUserProfileFeed(Long userId, int limit, String cursor, Long loggedInUserId) {
 
         Thoughts.GetUserHistoryRequest.Builder request = Thoughts.GetUserHistoryRequest.newBuilder()
                 .setUserId(userId)
-                .setLimit(limit) ;
-        if (cursor != null) { request.setCursor(cursor); }
-        return blockingStub.getUserHistory(request.build()) ;
+                .setLimit(limit);
+        if (cursor != null) {
+            request.setCursor(cursor);
+        }
+        if (loggedInUserId != null) {
+            request.setLoggedInUserId(loggedInUserId);
+        }
+        return blockingStub.getUserHistory(request.build());
     }
 
     public Thoughts.CreateResponse createThought(Long userId, CreateThoughtDTO thought) {
 
-        Thoughts.CreateRequest.Builder request = Thoughts.CreateRequest.newBuilder() ;
+        Thoughts.CreateRequest.Builder request = Thoughts.CreateRequest.newBuilder();
 
-        request.setUserId(userId) ;
+        request.setUserId(userId);
 
-        if(thought.parentThoughtId() != null){
-            request.setParentThoughtId(thought.parentThoughtId()) ;
+        if (thought.parentThoughtId() != null) {
+            request.setParentThoughtId(thought.parentThoughtId());
         }
 
-        if(thought.content() != null) {
-            request.setContent(thought.content()) ;
+        if (thought.content() != null) {
+            request.setContent(thought.content());
         }
 
         // media urls in next phase
 
-        return blockingStub.createThought(request.build()) ;
+        return blockingStub.createThought(request.build());
     }
-
 
     public Empty deleteThought(Long userId, Long thoughtId) {
 
         Thoughts.DeleteRequest request = Thoughts.DeleteRequest.newBuilder()
                 .setThoughtId(thoughtId)
                 .setUserId(userId)
-                .build() ;
-        return blockingStub.deleteThought(request) ;
+                .build();
+        return blockingStub.deleteThought(request);
     }
 
     public Empty likeThought(Long userId, Long thoughtId) {
@@ -102,8 +105,8 @@ public class ThoughtsServiceGrpcHandler {
         Thoughts.LikeRequest request = Thoughts.LikeRequest.newBuilder()
                 .setThoughtId(thoughtId)
                 .setUserId(userId)
-                .build() ;
-        return blockingStub.likeThought(request) ;
+                .build();
+        return blockingStub.likeThought(request);
     }
 
     public Empty unLikeThought(Long userId, Long thoughtId) {
@@ -111,41 +114,47 @@ public class ThoughtsServiceGrpcHandler {
         Thoughts.LikeRequest request = Thoughts.LikeRequest.newBuilder()
                 .setThoughtId(thoughtId)
                 .setUserId(userId)
-                .build() ;
-        return blockingStub.unlikeThought(request) ;
+                .build();
+        return blockingStub.unlikeThought(request);
     }
-
 
     public Thoughts.GetLikesResponse getThoughtLikes(Long thoughtId, int limit, String cursor) {
-        Thoughts.GetLikesRequest.Builder request =  Thoughts.GetLikesRequest.newBuilder()
+        Thoughts.GetLikesRequest.Builder request = Thoughts.GetLikesRequest.newBuilder()
                 .setThoughtId(thoughtId)
                 .setLimit(limit);
-        if (cursor != null) { request.setCursor(cursor); }
-        return blockingStub.getThoughtLikes(request.build()) ;
+        if (cursor != null) {
+            request.setCursor(cursor);
+        }
+        return blockingStub.getThoughtLikes(request.build());
     }
-
 
     public Thoughts.GetRepostsResponse getThoughtReposts(Long thoughtId, int limit, String cursor) {
         Thoughts.GetRepostsRequest.Builder request = Thoughts.GetRepostsRequest.newBuilder()
                 .setThoughtId(thoughtId)
-                .setLimit(limit) ;
-        if (cursor != null) { request.setCursor(cursor); }
-        return blockingStub.getReposts(request.build()) ;
+                .setLimit(limit);
+        if (cursor != null) {
+            request.setCursor(cursor);
+        }
+        return blockingStub.getReposts(request.build());
     }
 
-    public Thoughts.GetThoughtResponse getThought(Long thoughtId) {
-        Thoughts.GetThoughtRequest request = Thoughts.GetThoughtRequest.newBuilder().setThoughtId(thoughtId).build() ;
-        return blockingStub.getThought(request) ;
+    public Thoughts.GetThoughtResponse getThought(Long thoughtId, Long loggedInUserId) {
+        Thoughts.GetThoughtRequest.Builder request = Thoughts.GetThoughtRequest.newBuilder().setThoughtId(thoughtId);
+        if (loggedInUserId != null) {
+            request.setUserId(loggedInUserId);
+        }
+        return blockingStub.getThought(request.build());
     }
-
 
     public Thoughts.GetOpinionsResponse getOpinions(Long thoughtId, int limit, String cursor) {
 
         Thoughts.GetOpinionsRequest.Builder request = Thoughts.GetOpinionsRequest.newBuilder()
                 .setThoughtId(thoughtId)
                 .setLimit(limit);
-        if (cursor != null) { request.setCursor(cursor); }
-        return blockingStub.getOpinions(request.build()) ;
+        if (cursor != null) {
+            request.setCursor(cursor);
+        }
+        return blockingStub.getOpinions(request.build());
     }
 
 }

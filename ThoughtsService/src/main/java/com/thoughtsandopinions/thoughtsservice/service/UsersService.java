@@ -141,11 +141,22 @@ public class UsersService {
     @Transactional
     public void storeUser(Thoughts.Users user_) {
         log.info("Attempting to store user: {} (userId: {})", user_.getUsername(), user_.getUserId());
-        // it actually acting as post and Put request both
-        UsersEntity user = new UsersEntity();
-        user.setId(user_.getUserId());
-        user.setName(user_.getName());
-        user.setUsername(user_.getUsername());
+        // Merge with existing to prevent cascading delete of thoughts collection
+        Optional<UsersEntity> existingOpt = userRepo.findById(user_.getUserId());
+        UsersEntity user;
+        if (existingOpt.isPresent()) {
+            user = existingOpt.get();
+        } else {
+            user = new UsersEntity();
+            user.setId(user_.getUserId());
+        }
+
+        if (user_.getName() != null && !user_.getName().isEmpty()) {
+            user.setName(user_.getName());
+        }
+        if (user_.getUsername() != null && !user_.getUsername().isEmpty()) {
+            user.setUsername(user_.getUsername());
+        }
         if (user_.hasProfilePicUrl()) {
             user.setProfilePicUrl(user_.getProfilePicUrl());
         }
