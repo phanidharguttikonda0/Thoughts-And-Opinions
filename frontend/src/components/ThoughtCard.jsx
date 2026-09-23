@@ -187,10 +187,18 @@ const ThoughtCard = ({ thought, showParent = false }) => {
         <div className="flex gap-3">
           {/* Avatar */}
           <div 
-            className="w-12 h-12 rounded-full bg-(--color-primary) flex items-center justify-center text-white font-bold shrink-0 cursor-pointer hover:opacity-80 transition-opacity"
+            className="w-12 h-12 rounded-full bg-(--color-primary) flex items-center justify-center text-white font-bold shrink-0 cursor-pointer hover:opacity-80 transition-opacity overflow-hidden"
             onClick={(e) => navigateToProfile(e, user.userId || user.id)}
           >
-            {user.name ? user.name.charAt(0).toUpperCase() : 'U'}
+            {user.profilePicUrl ? (
+              <img 
+                src={user.profilePicUrl.startsWith('http') ? user.profilePicUrl : `http://localhost:8080${user.profilePicUrl}`} 
+                alt={user.name} 
+                className="w-full h-full object-cover"
+              />
+            ) : (
+              user.name ? user.name.charAt(0).toUpperCase() : 'U'
+            )}
           </div>
           
           <div className="flex-1 min-w-0">

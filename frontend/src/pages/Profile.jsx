@@ -17,6 +17,8 @@ const Profile = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
+  const [isFollowing, setIsFollowing] = useState(false);
+  const [followLoading, setFollowLoading] = useState(false);
   
   // Follower/Following Modal state
   const [showUsersModal, setShowUsersModal] = useState(false);
@@ -52,9 +54,24 @@ const Profile = () => {
           userId: userData.userId,
           name: userData.name,
           username: userData.username,
+          profilePicUrl: userData.profilePicUrl,
         }
       }));
       setThoughts(mappedThoughts);
+
+      // 3. Fetch is-following status if not own profile
+      const currentUserIdStr = String(currentUser?.user_id || currentUser?.userId);
+      const targetUserIdStr = String(targetUserId);
+      if (currentUserIdStr !== targetUserIdStr) {
+        try {
+          const followRes = await api.get(`/user/${targetUserIdStr}/is-following`);
+          if (followRes.data.success) {
+            setIsFollowing(followRes.data.data);
+          }
+        } catch (followErr) {
+          console.error("Failed to check following status", followErr);
+        }
+      }
 
     } catch (err) {
       console.error("Failed to fetch profile", err);
@@ -106,6 +123,25 @@ const Profile = () => {
       console.error(`Failed to fetch ${type}`, err);
     } finally {
       setLoadingUsers(false);
+    }
+  };
+
+  const toggleFollow = async () => {
+    try {
+      setFollowLoading(true);
+      if (isFollowing) {
+        await api.delete(`/user/${targetUserId}/follow`);
+        setIsFollowing(false);
+        setProfileUser(prev => ({ ...prev, followersCount: Math.max(0, (prev.followersCount || 0) - 1) }));
+      } else {
+        await api.get(`/user/${targetUserId}/follow`);
+        setIsFollowing(true);
+        setProfileUser(prev => ({ ...prev, followersCount: (prev.followersCount || 0) + 1 }));
+      }
+    } catch (err) {
+      console.error("Failed to toggle follow", err);
+    } finally {
+      setFollowLoading(false);
     }
   };
 
@@ -174,8 +210,16 @@ const Profile = () => {
               Edit Profile
             </button>
           ) : (
-            <button className="px-4 py-1.5 rounded-full bg-(--text-primary) text-(--bg-primary) font-bold hover:opacity-90 transition-opacity">
-              Follow
+            <button 
+              onClick={toggleFollow}
+              disabled={followLoading}
+              className={`px-4 py-1.5 rounded-full font-bold transition-opacity ${
+                isFollowing 
+                  ? "border border-(--border-color) bg-transparent hover:bg-red-500/10 hover:text-red-500 hover:border-red-500" 
+                  : "bg-(--text-primary) text-(--bg-primary) hover:opacity-90"
+              } disabled:opacity-50`}
+            >
+              {isFollowing ? (followLoading ? "..." : "Unfollow") : (followLoading ? "..." : "Follow")}
             </button>
           )}
         </div>
