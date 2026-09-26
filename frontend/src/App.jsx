@@ -6,6 +6,7 @@ import Layout from './components/Layout';
 import Home from './pages/Home';
 import Profile from './pages/Profile';
 import ThoughtDetail from './pages/ThoughtDetail';
+import Notifications from './pages/Notifications';
 import Login from './pages/Login';
 import Signup from './pages/Signup';
 
@@ -28,6 +29,7 @@ function App() {
               <Route index element={<Home />} />
               <Route path="profile/:id" element={<Profile />} />
               <Route path="thought/:id" element={<ThoughtDetail />} />
+              <Route path="notifications" element={<Notifications />} />
             </Route>
           </Routes>
         </BrowserRouter>

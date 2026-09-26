@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { Outlet, Link, useNavigate, useLocation } from 'react-router-dom';
-import { Home, User, LogOut, Search, Moon, Sun, Feather } from 'lucide-react';
+import { Home, User, LogOut, Search, Moon, Sun, Feather, Bell } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 import { useTheme } from '../context/ThemeContext';
 import api from '../services/api';
@@ -12,6 +12,7 @@ const Sidebar = () => {
 
   const navItems = [
     { name: 'Home', path: '/', icon: Home },
+    { name: 'Notifications', path: '/notifications', icon: Bell },
     { name: 'Profile', path: `/profile/${user?.user_id}`, icon: User },
   ];
 
