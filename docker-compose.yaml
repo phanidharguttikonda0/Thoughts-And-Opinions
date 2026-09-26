@@ -79,6 +79,140 @@ services:
       - to_network
     restart: unless-stopped
 
+  # -----------------------------------------
+  # 5. Identity Service
+  # -----------------------------------------
+  identity-service:
+    build:
+      context: ./IdentityService
+      dockerfile: Dockerfile
+    container_name: to_identity
+    ports:
+      - "9090:9090"
+    environment:
+      - SPRING_DATASOURCE_URL=jdbc:postgresql://to_postgres:5432/identity_db
+      - SPRING_DATASOURCE_USERNAME=admin
+      - SPRING_DATASOURCE_PASSWORD=admin_password
+    depends_on:
+      - postgres
+    networks:
+      - to_network
+    restart: unless-stopped
+
+  # -----------------------------------------
+  # 6. Thoughts Service
+  # -----------------------------------------
+  thoughts-service:
+    build:
+      context: ./ThoughtsService
+      dockerfile: Dockerfile
+    container_name: to_thoughts
+    ports:
+      - "9091:9091"
+    environment:
+      - SPRING_DATASOURCE_URL=jdbc:postgresql://to_postgres:5432/thoughts_db
+      - SPRING_DATASOURCE_USERNAME=admin
+      - SPRING_DATASOURCE_PASSWORD=admin_password
+    depends_on:
+      - postgres
+    networks:
+      - to_network
+    restart: unless-stopped
+
+  # -----------------------------------------
+  # 7. Timeline Service
+  # -----------------------------------------
+  timeline-service:
+    build:
+      context: ./timelineservice
+      dockerfile: Dockerfile
+    container_name: to_timeline
+    ports:
+      - "8083:8083"
+      - "9094:9094"
+    environment:
+      - REDIS_HOST=to_redis
+      - REDIS_PORT=6379
+      - KAFKA_HOST=to_kafka
+      - KAFKA_PORT=9092
+    depends_on:
+      - redis
+      - kafka
+    networks:
+      - to_network
+    restart: unless-stopped
+
+  # -----------------------------------------
+  # 8. Notification Service
+  # -----------------------------------------
+  notification-service:
+    build:
+      context: ./NotificationService
+      dockerfile: Dockerfile
+    container_name: to_notification
+    ports:
+      - "9095:9095"
+    environment:
+      - REDIS_ADDR=to_redis:6379
+      - KAFKA_BROKER=to_kafka:9092
+      - GRPC_PORT=9095
+    depends_on:
+      - redis
+      - kafka
+    networks:
+      - to_network
+    restart: unless-stopped
+
+  # -----------------------------------------
+  # 9. API Gateway
+  # -----------------------------------------
+  api-gateway:
+    build:
+      context: ./APIGateway
+      dockerfile: Dockerfile
+    container_name: to_apigateway
+    ports:
+      - "8080:8080"
+    environment:
+      - SPRING_DATA_REDIS_HOST=to_redis
+      - SPRING_DATA_REDIS_PORT=6379
+      - KAFKA_HOST=to_kafka
+      - KAFKA_PORT=9092
+      - IDENTITY_GRPC_HOST=to_identity
+      - THOUGHTS_GRPC_HOST=to_thoughts
+      - TIMELINE_GRPC_HOST=to_timeline
+      - NOTIFICATION_GRPC_HOST=to_notification
+      - MINIO_ENDPOINT=http://to_minio:9000
+    depends_on:
+      - identity-service
+      - thoughts-service
+      - timeline-service
+      - notification-service
+      - redis
+      - kafka
+      - minio
+    networks:
+      - to_network
+    restart: unless-stopped
+
+  # -----------------------------------------
+  # 10. Frontend
+  # -----------------------------------------
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    container_name: to_frontend
+    ports:
+      - "5173:5173"
+    environment:
+      - VITE_API_BASE_URL=http://localhost:8080
+    depends_on:
+      - api-gateway
+    networks:
+      - to_network
+    restart: unless-stopped
+
 networks:
   to_network:
     driver: bridge
