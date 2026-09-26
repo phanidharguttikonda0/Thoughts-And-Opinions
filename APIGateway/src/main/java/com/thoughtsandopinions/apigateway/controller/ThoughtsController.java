@@ -28,7 +28,10 @@ public class ThoughtsController {
 
 
     @PostMapping("/") // creates the thought
-    public Mono<ResponseEntity<ResponseDTO<CreateThoughtResponseDTO>>> createThought(@RequestHeader("X-User-Id") Long userId, @RequestBody CreateThoughtDTO request) {
+    public Mono<ResponseEntity<ResponseDTO<CreateThoughtResponseDTO>>> createThought(
+            @RequestHeader("X-User-Id") Long userId,
+            @RequestHeader(value = "X-User-Name", required = false) String username,
+            @RequestBody CreateThoughtDTO request) {
 
         return Mono.fromCallable(() -> thoughtsServiceGrpcHandler.createThought(userId, request))
                 .subscribeOn(Schedulers.boundedElastic())
@@ -39,17 +42,28 @@ public class ThoughtsController {
                     ThoughtCreatedEvent event = new ThoughtCreatedEvent(
                             String.valueOf(dto.thoughtId()),
                             String.valueOf(userId),
-                            System.currentTimeMillis() // Using current time as createdAt score
+                            System.currentTimeMillis()
                     );
-                    java.util.concurrent.CompletableFuture<org.springframework.kafka.support.SendResult<String, Object>> future = kafkaTemplate.send("thought.created", event);
-                    future.whenComplete((result, ex) -> {
-                        if (ex == null) {
-                            System.out.println("Kafka message sent successfully to topic thought.created");
-                        } else {
-                            System.out.println("Error sending Kafka message: " + ex.getMessage());
-                            ex.printStackTrace();
+                    kafkaTemplate.send("thought.created", event);
+
+                    // Publish notification event for OPINION or REPOST
+                    if (request.parentThoughtId() != null) {
+                        try {
+                            Thoughts.GetThoughtResponse parentThought = thoughtsServiceGrpcHandler.getThought(request.parentThoughtId(), null);
+                            long parentOwnerId = parentThought.getUser().getUserId();
+                            if (parentOwnerId != userId) {
+                                String notifType = (request.content() != null && !request.content().isEmpty()) ? "OPINION" : "REPOST";
+                                NotificationEvent notifEvent = new NotificationEvent(
+                                        notifType, userId, username != null ? username : "",
+                                        parentOwnerId, request.parentThoughtId(), System.currentTimeMillis()
+                                );
+                                kafkaTemplate.send("notification.events", String.valueOf(parentOwnerId), notifEvent);
+                            }
+                        } catch (Exception e) {
+                            System.out.println("Failed to send notification event: " + e.getMessage());
                         }
-                    });                    
+                    }
+
                     return ResponseEntity.ok(
                         ResponseDTO.<CreateThoughtResponseDTO>builder()
                                 .success(true)
@@ -73,16 +87,35 @@ public class ThoughtsController {
     }
 
     @GetMapping("/interact/{thoughtId}")
-    public Mono<ResponseEntity<ResponseDTO<Void>>> likeThought(@RequestHeader("X-User-Id") Long userId, @PathVariable("thoughtId") Long thoughtId) {
+    public Mono<ResponseEntity<ResponseDTO<Void>>> likeThought(
+            @RequestHeader("X-User-Id") Long userId,
+            @RequestHeader(value = "X-User-Name", required = false) String username,
+            @PathVariable("thoughtId") Long thoughtId) {
 
         return Mono.fromCallable(() -> thoughtsServiceGrpcHandler.likeThought(userId, thoughtId))
                 .subscribeOn(Schedulers.boundedElastic())
-                .map(response -> ResponseEntity.ok(
-                        ResponseDTO.<Void>builder()
-                                .success(true)
-                                .message("liked thought")
-                                .build()
-                )) ;
+                .map(response -> {
+                    // Publish LIKE notification event
+                    try {
+                        Thoughts.GetThoughtResponse thought = thoughtsServiceGrpcHandler.getThought(thoughtId, null);
+                        long thoughtOwnerId = thought.getUser().getUserId();
+                        if (thoughtOwnerId != userId) {
+                            NotificationEvent notifEvent = new NotificationEvent(
+                                    "LIKE", userId, username != null ? username : "",
+                                    thoughtOwnerId, thoughtId, System.currentTimeMillis()
+                            );
+                            kafkaTemplate.send("notification.events", String.valueOf(thoughtOwnerId), notifEvent);
+                        }
+                    } catch (Exception e) {
+                        System.out.println("Failed to send LIKE notification: " + e.getMessage());
+                    }
+                    return ResponseEntity.ok(
+                            ResponseDTO.<Void>builder()
+                                    .success(true)
+                                    .message("liked thought")
+                                    .build()
+                    );
+                }) ;
     }
 
     @DeleteMapping("/interact/{thoughtId}")

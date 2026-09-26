@@ -1,11 +1,13 @@
 package com.thoughtsandopinions.apigateway.controller;
 
+import com.thoughtsandopinions.apigateway.dto.api.NotificationEvent;
 import com.thoughtsandopinions.apigateway.dto.api.UsersFeedDTO;
 import com.thoughtsandopinions.apigateway.dto.api.UserDTO;
 import com.thoughtsandopinions.apigateway.utils.DtoMapper;
 import com.thoughtsandopinions.apigateway.dto.api.ResponseDTO;
 import com.thoughtsandopinions.apigateway.gRPC.IdentityServiceGrpcHandler;
 import org.springframework.http.ResponseEntity;
+import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.web.bind.annotation.*;
 import reactor.core.publisher.Mono;
 import reactor.core.scheduler.Schedulers;
@@ -15,18 +17,35 @@ import reactor.core.scheduler.Schedulers;
 public class FollowController {
 
     private final IdentityServiceGrpcHandler identityServiceGrpcHandler ;
+    private final KafkaTemplate<String, Object> kafkaTemplate;
 
-    public FollowController(IdentityServiceGrpcHandler identityServiceGrpcHandler) {
+    public FollowController(IdentityServiceGrpcHandler identityServiceGrpcHandler, KafkaTemplate<String, Object> kafkaTemplate) {
         this.identityServiceGrpcHandler = identityServiceGrpcHandler ;
+        this.kafkaTemplate = kafkaTemplate;
     }
 
 
     @GetMapping("/{id}/follow")
-    public Mono<ResponseEntity<ResponseDTO<Void>>> followUser(@RequestHeader("X-User-Id") Long userId, @PathVariable("id") Long targetUserId) {
+    public Mono<ResponseEntity<ResponseDTO<Void>>> followUser(
+            @RequestHeader("X-User-Id") Long userId,
+            @RequestHeader(value = "X-User-Name", required = false) String username,
+            @PathVariable("id") Long targetUserId) {
 
         return Mono.fromCallable(() -> identityServiceGrpcHandler.followUser(userId, targetUserId))
                 .subscribeOn(Schedulers.boundedElastic())
                 .map(grpcResponse -> {
+                    // Publish FOLLOW notification event
+                    if (!userId.equals(targetUserId)) {
+                        try {
+                            NotificationEvent notifEvent = new NotificationEvent(
+                                    "FOLLOW", userId, username != null ? username : "",
+                                    targetUserId, 0L, System.currentTimeMillis()
+                            );
+                            kafkaTemplate.send("notification.events", String.valueOf(targetUserId), notifEvent);
+                        } catch (Exception e) {
+                            System.out.println("Failed to send FOLLOW notification: " + e.getMessage());
+                        }
+                    }
 
                     ResponseDTO<Void> response = ResponseDTO.<Void>builder()
                             .success(true)
@@ -36,6 +55,7 @@ public class FollowController {
 
                 }) ;
     }
+
 
     @DeleteMapping("/{id}/follow")
     public Mono<ResponseEntity<ResponseDTO<Void>>> unFollowUser(@RequestHeader("X-User-Id") Long userId, @PathVariable("id") Long targetUserId) {

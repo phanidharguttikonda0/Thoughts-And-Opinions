@@ -1,0 +1,28 @@
+syntax = "proto3";
+package notification;
+
+option java_multiple_files = true;
+
+service NotificationService {
+  rpc GetNotifications (GetNotificationsRequest) returns (GetNotificationsResponse);
+}
+
+message GetNotificationsRequest {
+  int64 user_id = 1;
+  int32 limit = 2;
+  optional string cursor = 3;
+}
+
+message NotificationItem {
+  string notification_id = 1;
+  string type = 2;           // LIKE, REPOST, OPINION, FOLLOW
+  int64 actor_id = 3;
+  string actor_username = 4;
+  int64 thought_id = 5;      // 0 for FOLLOW
+  int64 timestamp = 6;       // Unix millis
+}
+
+message GetNotificationsResponse {
+  repeated NotificationItem notifications = 1;
+  string next_cursor = 2;
+}
