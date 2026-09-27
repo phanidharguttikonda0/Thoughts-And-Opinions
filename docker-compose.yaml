@@ -193,23 +193,7 @@ services:
       - to_network
     restart: unless-stopped
 
-  # -----------------------------------------
-  # 10. Frontend
-  # -----------------------------------------
-  frontend:
-    build:
-      context: ./frontend
-      dockerfile: Dockerfile
-    container_name: to_frontend
-    ports:
-      - "5173:5173"
-    environment:
-      - VITE_API_BASE_URL=http://localhost:8080
-    depends_on:
-      - api-gateway
-    networks:
-      - to_network
-    restart: unless-stopped
+
 
 networks:
   to_network:
