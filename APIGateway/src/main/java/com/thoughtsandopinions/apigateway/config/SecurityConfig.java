@@ -32,7 +32,7 @@ public class SecurityConfig {
 
         // Define allowed origins, methods, and headers
         configuration.setAllowedOrigins(List.of("http://localhost:5173", "https://to.phani.pro"));
-        configuration.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "PATCH"));
+        configuration.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS"));
         configuration.setAllowedHeaders(List.of("Authorization", "Content-Type", "X-User-Id"));
         configuration.setAllowCredentials(true);
 
