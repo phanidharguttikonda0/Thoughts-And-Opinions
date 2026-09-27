@@ -210,7 +210,7 @@ services:
     networks:
       - to_network
     depends_on:
-      - apigateway
+      - api-gateway
       - minio
 
 networks:
