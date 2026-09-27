@@ -12,7 +12,7 @@ import java.time.OffsetDateTime;
 @Setter
 @NoArgsConstructor
 @Entity
-@Table(name = "followers", schema = "identity_db")
+@Table(name = "followers")
 public class FollowerEntity {
 
     @EmbeddedId
