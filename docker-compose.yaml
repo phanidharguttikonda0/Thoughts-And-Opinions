@@ -62,7 +62,7 @@ services:
   # 4. MinIO (Self-Hosted S3 Object Storage)
   # -----------------------------------------
   minio:
-    image: bitnami/minio:latest
+    image: elestio/minio:latest
     container_name: to_minio
     ports:
       - "9000:9000" # API Port
