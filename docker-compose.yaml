@@ -4,7 +4,7 @@ services:
   # -----------------------------------------
   postgres:
     image: postgres:17-alpine
-    container_name: to_postgres
+    container_name: to-postgres
     ports:
       - "5433:5432"
     environment:
@@ -23,7 +23,7 @@ services:
   # -----------------------------------------
   redis:
     image: redis:latest
-    container_name: to_redis
+    container_name: to-redis
     ports:
       - "6379:6379"
     command: ["redis-server", "--appendonly", "yes"]
@@ -38,7 +38,7 @@ services:
   # -----------------------------------------
   kafka:
     image: apache/kafka:latest
-    container_name: to_kafka
+    container_name: to-kafka
     ports:
       - "9092:9092"
     environment:
@@ -63,7 +63,7 @@ services:
   # -----------------------------------------
   minio:
     image: elestio/minio:latest
-    container_name: to_minio
+    container_name: to-minio
     ports:
       - "9000:9000" # API Port
       - "9001:9001" # Web Console Port
@@ -84,11 +84,11 @@ services:
     build:
       context: ./IdentityService
       dockerfile: Dockerfile
-    container_name: to_identity
+    container_name: to-identity
     ports:
       - "9090:9090"
     environment:
-      - SPRING_DATASOURCE_URL=jdbc:postgresql://to_postgres:5432/identity_db
+      - SPRING_DATASOURCE_URL=jdbc:postgresql://to-postgres:5432/identity_db
       - SPRING_DATASOURCE_USERNAME=admin
       - SPRING_DATASOURCE_PASSWORD=admin_password
     depends_on:
@@ -104,11 +104,11 @@ services:
     build:
       context: ./ThoughtsService
       dockerfile: Dockerfile
-    container_name: to_thoughts
+    container_name: to-thoughts
     ports:
       - "9091:9091"
     environment:
-      - SPRING_DATASOURCE_URL=jdbc:postgresql://to_postgres:5432/thoughts_db
+      - SPRING_DATASOURCE_URL=jdbc:postgresql://to-postgres:5432/thoughts_db
       - SPRING_DATASOURCE_USERNAME=admin
       - SPRING_DATASOURCE_PASSWORD=admin_password
     depends_on:
@@ -124,17 +124,17 @@ services:
     build:
       context: ./timelineservice
       dockerfile: Dockerfile
-    container_name: to_timeline
+    container_name: to-timeline
     ports:
       - "8083:8083"
       - "9094:9094"
     environment:
-      - REDIS_HOST=to_redis
+      - REDIS_HOST=to-redis
       - REDIS_PORT=6379
-      - KAFKA_HOST=to_kafka
+      - KAFKA_HOST=to-kafka
       - KAFKA_PORT=9092
-      - IDENTITY_GRPC_HOST=to_identity
-      - THOUGHTS_GRPC_HOST=to_thoughts
+      - IDENTITY_GRPC_HOST=to-identity
+      - THOUGHTS_GRPC_HOST=to-thoughts
     depends_on:
       - redis
       - kafka
@@ -149,12 +149,12 @@ services:
     build:
       context: ./NotificationService
       dockerfile: Dockerfile
-    container_name: to_notification
+    container_name: to-notification
     ports:
       - "9095:9095"
     environment:
-      - REDIS_ADDR=to_redis:6379
-      - KAFKA_BROKER=to_kafka:9092
+      - REDIS_ADDR=to-redis:6379
+      - KAFKA_BROKER=to-kafka:9092
       - GRPC_PORT=9095
     depends_on:
       - redis
@@ -170,19 +170,19 @@ services:
     build:
       context: ./APIGateway
       dockerfile: Dockerfile
-    container_name: to_apigateway
+    container_name: to-apigateway
     ports:
       - "8080:8080"
     environment:
-      - SPRING_DATA_REDIS_HOST=to_redis
+      - SPRING_DATA_REDIS_HOST=to-redis
       - SPRING_DATA_REDIS_PORT=6379
-      - KAFKA_HOST=to_kafka
+      - KAFKA_HOST=to-kafka
       - KAFKA_PORT=9092
-      - IDENTITY_GRPC_HOST=to_identity
-      - THOUGHTS_GRPC_HOST=to_thoughts
-      - TIMELINE_GRPC_HOST=to_timeline
-      - NOTIFICATION_GRPC_HOST=to_notification
-      - MINIO_ENDPOINT=http://to_minio:9000
+      - IDENTITY_GRPC_HOST=to-identity
+      - THOUGHTS_GRPC_HOST=to-thoughts
+      - TIMELINE_GRPC_HOST=to-timeline
+      - NOTIFICATION_GRPC_HOST=to-notification
+      - MINIO_ENDPOINT=http://to-minio:9000
     depends_on:
       - identity-service
       - thoughts-service
