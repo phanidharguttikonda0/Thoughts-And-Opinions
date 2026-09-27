@@ -25,9 +25,9 @@ declare -a USERNAMES
 
 echo "1. Creating ${NUM_USERS} users..."
 for i in $(seq 1 $NUM_USERS); do
-    USERNAME="user${i}_$RANDOM"
-    EMAIL="user${i}_$RANDOM@example.com"
-    NAME="User ${i}"
+    USERNAME="testuser${i}"
+    EMAIL="testuser${i}@example.com"
+    NAME="Test User ${i}"
     PASSWORD="password123"
     
     echo "Creating $USERNAME..."

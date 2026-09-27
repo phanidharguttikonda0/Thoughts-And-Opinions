@@ -92,3 +92,21 @@ For granular, manual testing, an `api-tests.http` file is provided in the root d
 2. Ensure you execute the `POST /auth/signin` blocks first. The IDE will automatically capture the returned JWT Token into an environment variable (e.g. `{{token1}}`).
 3. Click "Run" next to any subsequent request to test specific behaviors independently.
 4. Note: Multipart Form requests (like Profile Picture uploads via `PATCH /profile/`) are commented out and require valid local file path configurations in your IDE to test successfully.
+
+### 4. Seeding Data (`seed_data.sh`)
+After running `docker compose up --build -d` to spin up the infrastructure, you can execute the data seeding script to automatically populate the database with users, social graphs, and posts:
+
+```bash
+./seed_data.sh
+```
+
+**Test Users:**
+The script generates the following test users that follow each other and contain populated feeds. You can log into any of these accounts from the frontend.
+
+| Username | Password |
+| :--- | :--- |
+| `testuser1` | `password123` |
+| `testuser2` | `password123` |
+| `testuser3` | `password123` |
+| `testuser4` | `password123` |
+| `testuser5` | `password123` |
