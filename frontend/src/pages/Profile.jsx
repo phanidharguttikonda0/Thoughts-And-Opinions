@@ -185,7 +185,7 @@ const Profile = () => {
         <div className="absolute -bottom-16 left-4 border-4 border-(--bg-primary) rounded-full w-32 h-32 bg-(--color-primary) flex items-center justify-center text-white text-5xl font-bold overflow-hidden">
           {profileUser.profilePicUrl ? (
             <img 
-              src={profileUser.profilePicUrl.startsWith('http') ? profileUser.profilePicUrl : `${import.meta.env.VITE_API_BASE_URL || 'https://to.app.phani.pro'}${profileUser.profilePicUrl}`} 
+              src={profileUser.profilePicUrl.startsWith('http') ? profileUser.profilePicUrl : `${import.meta.env.VITE_API_BASE_URL || 'https://api.phani.pro'}${profileUser.profilePicUrl}`} 
               alt={profileUser.name} 
               className="w-full h-full object-cover"
             />
@@ -317,7 +317,7 @@ const Profile = () => {
                 >
                   <div className="w-10 h-10 rounded-full bg-(--color-primary) flex items-center justify-center text-white font-bold shrink-0 overflow-hidden">
                     {u.profilePicUrl ? (
-                      <img src={u.profilePicUrl.startsWith('http') ? u.profilePicUrl : `${import.meta.env.VITE_API_BASE_URL || 'https://to.app.phani.pro'}${u.profilePicUrl}`} alt={u.name} className="w-full h-full object-cover" />
+                      <img src={u.profilePicUrl.startsWith('http') ? u.profilePicUrl : `${import.meta.env.VITE_API_BASE_URL || 'https://api.phani.pro'}${u.profilePicUrl}`} alt={u.name} className="w-full h-full object-cover" />
                     ) : (
                       u.name?.charAt(0).toUpperCase()
                     )}

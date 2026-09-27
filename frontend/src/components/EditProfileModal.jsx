@@ -95,7 +95,7 @@ const EditProfileModal = ({ isOpen, onClose, user, onProfileUpdated }) => {
           <div className="relative mb-8 flex justify-center">
             <div className="relative w-24 h-24 rounded-full overflow-hidden bg-(--bg-secondary) flex items-center justify-center border-4 border-(--bg-primary)">
               {preview ? (
-                <img src={preview.startsWith('http') ? preview : `${import.meta.env.VITE_API_BASE_URL || 'https://to.app.phani.pro'}${preview}`} alt="Profile" className="w-full h-full object-cover" />
+                <img src={preview.startsWith('http') ? preview : `${import.meta.env.VITE_API_BASE_URL || 'https://api.phani.pro'}${preview}`} alt="Profile" className="w-full h-full object-cover" />
               ) : (
                 <span className="text-3xl font-bold">{user?.name?.charAt(0).toUpperCase()}</span>
               )}
