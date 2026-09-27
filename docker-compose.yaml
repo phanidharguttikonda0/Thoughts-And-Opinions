@@ -62,7 +62,7 @@ services:
   # 4. MinIO (Self-Hosted S3 Object Storage)
   # -----------------------------------------
   minio:
-    image: quay.io/minio/minio:latest
+    image: cgr.dev/chainguard/minio:latest
     container_name: to-minio
     ports:
       - "9000:9000" # API Port
