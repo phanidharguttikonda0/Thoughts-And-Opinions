@@ -197,6 +197,22 @@ services:
 
 
 
+  # -----------------------------------------
+  # 9. Frontend (React + Vite + Nginx)
+  # -----------------------------------------
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    container_name: to-frontend
+    ports:
+      - "80:80"
+    networks:
+      - to_network
+    depends_on:
+      - apigateway
+      - minio
+
 networks:
   to_network:
     driver: bridge
