@@ -64,7 +64,6 @@ services:
   minio:
     image: quay.io/minio/minio:latest
     container_name: to-minio
-    command: server /data --console-address ":9001"
     ports:
       - "9000:9000" # API Port
       - "9001:9001" # Web Console Port
