@@ -1,4 +1,0 @@
-2026/09/26 23:05:05 main.go:27: Starting Notification Service...
-2026/09/26 23:05:05 redis.go:38: Connected to Redis at localhost:6379
-2026/09/26 23:05:05 main.go:60: gRPC server listening on :9095
-2026/09/26 23:05:08 kafka.go:80: Kafka consumer started, listening on topic: notification.events
