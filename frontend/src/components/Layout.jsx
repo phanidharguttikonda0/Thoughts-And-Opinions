@@ -65,7 +65,7 @@ const Sidebar = () => {
             <div className="w-10 h-10 rounded-full bg-(--color-primary) flex items-center justify-center text-white font-bold shrink-0 overflow-hidden">
               {user.profilePicUrl ? (
                 <img 
-                  src={user.profilePicUrl.startsWith('http') ? user.profilePicUrl : `${import.meta.env.VITE_API_BASE_URL || 'https://140.245.199.122'}${user.profilePicUrl}`} 
+                  src={user.profilePicUrl.startsWith('http') ? user.profilePicUrl : `${import.meta.env.VITE_API_BASE_URL || 'https://to.app.phani.pro'}${user.profilePicUrl}`} 
                   alt={user.sub} 
                   className="w-full h-full object-cover" 
                 />

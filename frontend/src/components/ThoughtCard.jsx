@@ -192,7 +192,7 @@ const ThoughtCard = ({ thought, showParent = false }) => {
           >
             {user.profilePicUrl ? (
               <img 
-                src={user.profilePicUrl.startsWith('http') ? user.profilePicUrl : `${import.meta.env.VITE_API_BASE_URL || 'https://140.245.199.122'}${user.profilePicUrl}`} 
+                src={user.profilePicUrl.startsWith('http') ? user.profilePicUrl : `${import.meta.env.VITE_API_BASE_URL || 'https://to.app.phani.pro'}${user.profilePicUrl}`} 
                 alt={user.name} 
                 className="w-full h-full object-cover"
               />
