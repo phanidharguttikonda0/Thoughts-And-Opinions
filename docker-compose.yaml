@@ -133,6 +133,8 @@ services:
       - REDIS_PORT=6379
       - KAFKA_HOST=to_kafka
       - KAFKA_PORT=9092
+      - IDENTITY_GRPC_HOST=to_identity
+      - THOUGHTS_GRPC_HOST=to_thoughts
     depends_on:
       - redis
       - kafka
