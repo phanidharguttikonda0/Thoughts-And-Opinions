@@ -198,15 +198,15 @@ services:
 
 
   # -----------------------------------------
-  # 9. Frontend (React + Vite + Nginx)
+  # 9. Nginx Reverse Proxy (Backend API & Minio)
   # -----------------------------------------
-  frontend:
-    build:
-      context: ./frontend
-      dockerfile: Dockerfile
-    container_name: to-frontend
+  nginx:
+    image: nginx:alpine
+    container_name: to-nginx
     ports:
       - "80:80"
+    volumes:
+      - ./nginx.conf:/etc/nginx/conf.d/default.conf
     networks:
       - to_network
     depends_on:
